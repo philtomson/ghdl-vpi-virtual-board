@@ -6,10 +6,12 @@ SRC += src/rgbled.cc
 SRC += src/push_button.cc
 SRC += src/switch.cc
 SRC += src/segseven.cc
+SRC += src/board_window.cc
+SRC += src/main.cc
 
 OBJS     = $(addprefix $(BUILD)/, $(notdir $(SRC:.cc=.o)))
 OBJS    += $(BUILD)/resources.o
-CFLAGS  += -W -Wall -O2 -Isrc `pkg-config --cflags gtkmm-3.0`
+CFLAGS  += -W -Wall -O0 -g -Isrc `pkg-config --cflags gtkmm-3.0`
 LDFLAGS += `pkg-config --libs gtkmm-3.0` -lrt
 CXX      = g++
 
@@ -28,6 +30,9 @@ $(BUILD)/%.o: src/%.cc
 
 $(BUILD)/$(TARGET): $(OBJS)
 	$(CXX) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+exec: $(BUILD)/$(TARGET)
+	./$<
 
 clean:
 	@rm -rvf $(BUILD)

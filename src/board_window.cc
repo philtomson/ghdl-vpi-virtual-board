@@ -14,45 +14,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "VBSWindow.hh"
-#include "VBSApplication.hh"
-#include "BlobWrapper.hh"
+#include "board_window.hh"
 #include <gtkmm/messagedialog.h>
 #include <gdkmm/rgba.h>
 #include <gdkmm/pixbuf.h>
 #include <iostream>
 
-static void switch_0_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(0,  state); }
-static void switch_1_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(1,  state); }
-static void switch_2_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(2,  state); }
-static void switch_3_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(3,  state); }
-static void switch_4_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(4,  state); }
-static void switch_5_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(5,  state); }
-static void switch_6_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(6,  state); }
-static void switch_7_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(7,  state); }
-static void switch_8_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(8,  state); }
-static void switch_9_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(9,  state); }
-static void switch_10_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(10, state); }
-static void switch_11_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(11, state); }
-static void switch_12_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(12, state); }
-static void switch_13_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(13, state); }
-static void switch_14_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(14, state); }
-static void switch_15_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_switch(15, state); }
+static void switch_0_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_1_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_2_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_3_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_4_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_5_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_6_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_7_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_8_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_9_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
+static void switch_10_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_11_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_12_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_13_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_14_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_15_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
 
-static void push_button_center_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_c(state); }
-static void push_button_right_callbackfun(const PushButton *pb, bool state, void *arg)  { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_r(state); }
-static void push_button_top_callbackfun(const PushButton *pb, bool state, void *arg)    { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_u(state); }
-static void push_button_left_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_l(state); }
-static void push_button_bottom_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_d(state); }
-static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; VBSWindow *w = (VBSWindow*)arg; w->get_application()->blob_wrapper()->loop_set_button_rstn(state); }
+static void push_button_center_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; (void)state; (void)arg; }
+static void push_button_right_callbackfun(const PushButton *pb, bool state, void *arg)  { (void)pb; (void)state; (void)arg; }
+static void push_button_top_callbackfun(const PushButton *pb, bool state, void *arg)    { (void)pb; (void)state; (void)arg; }
+static void push_button_left_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; (void)state; (void)arg; }
+static void push_button_bottom_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; (void)state; (void)arg; }
+static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; (void)state; (void)arg; }
 
-VBSWindow::VBSWindow(VBSApplication *application) :
+
+//VBWindow::VBWindow(const Glib::RefPtr<Gtk::Application>& application) :
+VBWindow::VBWindow() :
 	Gtk::ApplicationWindow(),
-	m_application(application),
 	m_state_running(false),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_toolBar1(),
-	m_toolBar2(),
 	m_boxBoard(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_statusBar(),
 	m_boxSwitchAndLed(Gtk::Orientation::ORIENTATION_VERTICAL),
@@ -81,7 +79,6 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 	m_freq_spinbutton(),
 	m_dumpreg_button(),
 	m_separator_4(),
-	m_resset_button(),
 	m_design_name(),
 	m_logo_ensta(Gdk::Pixbuf::create_from_resource("/images/logo_ENSTA.png")),
 	m_boxlogo(),
@@ -96,7 +93,7 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 	//set_icon_name("cpu-symbolic");
 	set_icon_name("cpu-frequency-indicator");
 	set_size_request(520, 312);
-	m_statusBar.push("Stopped", VBSWindow::simulator_runstop_statusbar_context_id);
+	m_statusBar.push("Stopped", VBWindow::simulator_runstop_statusbar_context_id);
 
 	add(m_boxMain);
 
@@ -106,14 +103,14 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 	m_playpauseButton.set_label("Run");
 	m_playpauseButton.set_icon_name("gtk-media-play");
 	m_playpauseButton.set_tooltip_text("Run simulation");
-	m_playpauseButton.signal_clicked().connect(sigc::mem_fun(*this, &VBSWindow::on_run_button_clicked));
+	m_playpauseButton.signal_clicked().connect(sigc::mem_fun(*this, &VBWindow::on_run_button_clicked));
 	m_toolBar1.insert(m_playpauseButton, -1);
 
 	m_stepButton.set_label("Run N cycle");
 	m_stepButton.set_icon_name("gtk-media-next");
 	//m_stepButton.set_icon_name("gtk-media-forward");
 	m_stepButton.set_tooltip_text("Run simulation for N clock cycles");
-	m_stepButton.signal_clicked().connect(sigc::mem_fun(*this, &VBSWindow::on_step_button_clicked));
+	m_stepButton.signal_clicked().connect(sigc::mem_fun(*this, &VBWindow::on_step_button_clicked));
 	m_toolBar1.insert(m_stepButton, -1);
 
 	m_separator_0.set_draw();
@@ -133,8 +130,7 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 	m_toolBar1.insert(m_nstep_toolitem, -1);
 
 	m_separator_1.set_draw();
-	if (!m_application->blob_wrapper()->has_register_access())
-		m_separator_1.set_expand();
+	//m_separator_1.set_expand();
 	m_toolBar1.insert(m_separator_1, -1);
 
 	m_freq_label_toolitem.add(m_freq_label);
@@ -147,27 +143,19 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 	m_freq_spinbutton.set_numeric();
 	m_freq_spinbutton.set_increments(1, 10);
 	m_freq_spinbutton.set_tooltip_text("Clock cycles per second (to limit simulator speed)");
-	m_freq_spinbutton.signal_value_changed().connect(sigc::mem_fun(*this, &VBSWindow::on_freq_value_changed));
+	m_freq_spinbutton.signal_value_changed().connect(sigc::mem_fun(*this, &VBWindow::on_freq_value_changed));
 	m_freq_toolitem.add(m_freq_spinbutton);
 	m_toolBar1.insert(m_freq_toolitem, -1);
 
 	m_separator_4.set_draw();
-	m_separator_4.set_expand();
+	//m_separator_4.set_expand();
 	m_toolBar1.insert(m_separator_4, -1);
 
-	m_resset_button.set_label("Reset");
-	m_resset_button.set_icon_name("gtk-close");
-	m_resset_button.set_tooltip_text("Reset registers to their initial values");
-	m_resset_button.signal_clicked().connect(sigc::mem_fun(*this, &VBSWindow::on_reset_button_clicked));
-	m_toolBar1.insert(m_resset_button, -1);
-
-	if (m_application->blob_wrapper()->has_register_access()) {
-		m_dumpreg_button.set_label("Dump internal registers");
-		m_dumpreg_button.set_icon_name("gtk-find");
-		m_dumpreg_button.set_tooltip_text("Dump the content of internal registers on stdout");
-		m_dumpreg_button.signal_clicked().connect(sigc::mem_fun(*this, &VBSWindow::on_dump_button_clicked));
-		m_toolBar1.insert(m_dumpreg_button, -1);
-	}
+	m_dumpreg_button.set_label("Inspect signals");
+	m_dumpreg_button.set_icon_name("gtk-find");
+	m_dumpreg_button.set_tooltip_text("Inspect internal signals");
+	m_dumpreg_button.signal_clicked().connect(sigc::mem_fun(*this, &VBWindow::on_dump_button_clicked));
+	m_toolBar1.insert(m_dumpreg_button, -1);
 
 	m_boxMain.pack_start(m_toolBar1, Gtk::PACK_SHRINK, 0);
 
@@ -217,7 +205,7 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 
 	m_boxDisplaysRight.set_margin_left(20);
 
-	m_design_name.set_label(std::string("Virtual Board Simulator [") + m_application->blob_wrapper()->get_model()->name() + std::string("]"));
+	m_design_name.set_label("VPI Virtual Board Simulator");
 	m_design_name.override_color(Gdk::RGBA("white"));
 	//m_design_name.set_justify(Gtk::JUSTIFY_CENTER);
 	m_design_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
@@ -292,7 +280,7 @@ VBSWindow::VBSWindow(VBSApplication *application) :
 }
 
 
-VBSWindow::~VBSWindow()
+VBWindow::~VBWindow()
 {
 	int i;
 
@@ -310,26 +298,14 @@ VBSWindow::~VBSWindow()
 }
 
 
-// void VBSWindow::open_file_view(const Glib::RefPtr<Gio::File>& /* file */)
-// {
-// 	std::cout << "VBSWindow::open_file_view()" << std::endl;
-// }
-
-
-void VBSWindow::set_freq(int v)
-{
-	m_freq_spinbutton.set_value(v);
-}
-
-
-void VBSWindow::set_LEDs(unsigned short leds)
+void VBWindow::set_LEDs(unsigned short leds)
 {
 	for (int i(0); i < 16; i++, leds >>= 1)
 		m_leds[i]->set_state((bool)(leds & 1));
 }
 
 
-void VBSWindow::set_RGB_LEDs(int value, unsigned short lednum)
+void VBWindow::set_RGB_LEDs(int value, unsigned short lednum)
 {
 	switch (lednum) {
 		case 0:
@@ -342,7 +318,7 @@ void VBSWindow::set_RGB_LEDs(int value, unsigned short lednum)
 }
 
 
-void VBSWindow::set_display(unsigned char dispnum, unsigned char segments)
+void VBWindow::set_display(unsigned char dispnum, unsigned char segments)
 {
 	if (dispnum > 7)
 		return;
@@ -350,53 +326,38 @@ void VBSWindow::set_display(unsigned char dispnum, unsigned char segments)
 }
 
 
-void VBSWindow::on_run_button_clicked()
+void VBWindow::on_run_button_clicked()
 {
 	if (m_state_running)
-		m_application->blob_wrapper()->loop_stop();
+		printf("Stop\n");
 	else
-		m_application->blob_wrapper()->loop_run();
+		printf("Run\n");
 }
 
 
-void VBSWindow::on_step_button_clicked()
+void VBWindow::on_step_button_clicked()
 {
-	m_application->blob_wrapper()->loop_run_n_cycles((int)m_nstep_spinbutton.get_value());
+	printf("Step\n");
 }
 
 
-void VBSWindow::on_freq_value_changed()
+void VBWindow::on_freq_value_changed()
 {
-	m_application->blob_wrapper()->loop_set_freq((int)m_freq_spinbutton.get_value());
+	printf("freq: %d\n", (int)m_freq_spinbutton.get_value());
 }
 
 
-void VBSWindow::on_reset_button_clicked()
+void VBWindow::on_dump_button_clicked()
 {
-	m_application->blob_wrapper()->loop_resset();
+	printf("Pouet\n");
 }
 
 
-void VBSWindow::on_dump_button_clicked()
-{
-	unsigned int i;
-	const BlifUtils::Model *model = m_application->blob_wrapper()->get_model();
-	const BlifUtils::BitVector *bv;
-	std::vector<const std::string*> rvectnames = model->register_vector_names();
-	printf("------------------------------------------\n");
-	for (i = 0; i < rvectnames.size(); i++) {
-		/* TODO => print values longer than 64 bits, select output format, select if signed... */
-		bv = model->register_vector(*rvectnames[i]);
-		printf("%s[%d] = %lu\n", rvectnames[i]->c_str(), bv->bit_width(), bv->get_value_uint64());
-	}
-}
-
-
-void VBSWindow::on_simulator_stopped()
+void VBWindow::on_simulator_stopped()
 {
 	m_state_running = false;
-	m_statusBar.pop(VBSWindow::simulator_runstop_statusbar_context_id);
-	m_statusBar.push("Stopped", VBSWindow::simulator_runstop_statusbar_context_id);
+	m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
+	m_statusBar.push("Stopped", VBWindow::simulator_runstop_statusbar_context_id);
 	m_playpauseButton.set_label("Run");
 	m_playpauseButton.set_icon_name("gtk-media-play");
 	m_playpauseButton.set_tooltip_text("Run simulation");
@@ -404,11 +365,11 @@ void VBSWindow::on_simulator_stopped()
 }
 
 
-void VBSWindow::on_simulator_running()
+void VBWindow::on_simulator_running()
 {
 	m_state_running = true;
-	m_statusBar.pop(VBSWindow::simulator_runstop_statusbar_context_id);
-	m_statusBar.push("Running", VBSWindow::simulator_runstop_statusbar_context_id);
+	m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
+	m_statusBar.push("Running", VBWindow::simulator_runstop_statusbar_context_id);
 	m_playpauseButton.set_label("Stop");
 	m_playpauseButton.set_icon_name("gtk-media-pause");
 	m_playpauseButton.set_tooltip_text("Stop simulation");
@@ -416,10 +377,9 @@ void VBSWindow::on_simulator_running()
 }
 
 
-void VBSWindow::update_sensitivities()
+void VBWindow::update_sensitivities()
 {
 	m_stepButton.set_sensitive(!m_state_running);
-	m_playpauseButton.set_sensitive(true);
 }
 
 

@@ -14,9 +14,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ARGEN_SIMULATOR_WINDOW_HH
-#define ARGEN_SIMULATOR_WINDOW_HH
+#ifndef VIRTUAL_BOARD_WINDOW_HH
+#define VIRTUAL_BOARD_WINDOW_HH
 
+#include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
 #include <gtkmm/statusbar.h>
@@ -26,8 +27,6 @@
 #include <gtkmm/toolitem.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/separatortoolitem.h>
-#include <gtkmm/filechooserbutton.h>
-#include <gtkmm/filefilter.h>
 #include <gtkmm/image.h>
 #include "switch.hh"
 #include "push_button.hh"
@@ -36,10 +35,7 @@
 #include "segseven.hh"
 
 
-class VBSApplication;
-
-
-class VBSWindow : public Gtk::ApplicationWindow
+class VBWindow : public Gtk::ApplicationWindow
 {
 public:
 	static const guint         toolitem_statusbar_context_id = 40;
@@ -47,11 +43,9 @@ public:
 	static const guint         simulator_runstop_statusbar_context_id = 20;
 
 protected:
-	VBSApplication *m_application;
 	bool                       m_state_running;
 	Gtk::Box                   m_boxMain;
 	Gtk::Toolbar               m_toolBar1;
-	Gtk::Toolbar               m_toolBar2;
 	Gtk::Box                   m_boxBoard;
 	Gtk::Statusbar             m_statusBar;
 	Gtk::Box                   m_boxSwitchAndLed;
@@ -80,7 +74,6 @@ protected:
 	Gtk::SpinButton            m_freq_spinbutton;
 	Gtk::ToolButton            m_dumpreg_button;  
 	Gtk::SeparatorToolItem     m_separator_4;
-	Gtk::ToolButton            m_resset_button;  
 	Gtk::Label                 m_design_name;
 	Gtk::Image                 m_logo_ensta;
 	Gtk::Box                   m_boxlogo;
@@ -95,16 +88,14 @@ protected:
 
 
 public:
-	VBSWindow(VBSApplication *application);
-	virtual ~VBSWindow();
+	//VBWindow(const Glib::RefPtr<Gtk::Application>& application);
+	VBWindow();
+	virtual ~VBWindow();
 
-	VBSApplication* get_application() { return m_application; }
 	void set_freq(int v);
 	void set_LEDs(unsigned short leds);
 	void set_RGB_LEDs(int value, unsigned short lednum);
 	void set_display(unsigned char dispnum, unsigned char segments);
-
-	//void open_file_view(const Glib::RefPtr<Gio::File>& file);
 
 	/* Simulator callbacks */
 	void on_simulator_stopped();
@@ -115,12 +106,10 @@ protected:
 	void on_run_button_clicked();
 	void on_step_button_clicked();
 	void on_freq_value_changed();
-	void on_reset_button_clicked();
 	void on_dump_button_clicked();
 
 	void update_sensitivities();
-
 };
 
 
-#endif /* ARGEN_SIMULATOR_WINDOW_HH */
+#endif /* VIRTUAL_BOARD_WINDOW_HH */
