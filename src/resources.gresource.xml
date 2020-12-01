@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+	<gresource prefix="/images">
+		<file alias="switch_off.png"      >images/switch_off.png</file>
+		<file alias="switch_off_s.png"    >images/switch_off_s.png</file>
+		<file alias="switch_on.png"       >images/switch_on.png</file>
+		<file alias="switch_on_s.png"     >images/switch_on_s.png</file>
+		<file alias="button_pads_h.png"   >images/button_pads_h.png</file>
+		<file alias="button_pads_v.png"   >images/button_pads_v.png</file>
+		<file alias="button.png"          >images/button.png</file>
+		<file alias="button_s.png"        >images/button_s.png</file>
+		<file alias="button_pressed.png"  >images/button_pressed.png</file>
+		<file alias="button_pressed_s.png">images/button_pressed_s.png</file>
+		<file alias="led_off.png"         >images/led_off.png</file>
+		<file alias="led_on.png"          >images/led_on.png</file>
+		<file alias="7seg_base.png"       >images/7seg_base.png</file>
+		<file alias="7seg_base_left.png"  >images/7seg_base_left.png</file>
+		<file alias="7seg_base_middle.png">images/7seg_base_middle.png</file>
+		<file alias="7seg_base_right.png" >images/7seg_base_right.png</file>
+		<file alias="7seg_a.png"          >images/7seg_a.png</file>
+		<file alias="7seg_b.png"          >images/7seg_b.png</file>
+		<file alias="7seg_c.png"          >images/7seg_c.png</file>
+		<file alias="7seg_d.png"          >images/7seg_d.png</file>
+		<file alias="7seg_e.png"          >images/7seg_e.png</file>
+		<file alias="7seg_f.png"          >images/7seg_f.png</file>
+		<file alias="7seg_g.png"          >images/7seg_g.png</file>
+		<file alias="7seg_p.png"          >images/7seg_p.png</file>
+		<file alias="rgb_0.png"           >images/rgb_off.png</file>
+		<file alias="rgb_1.png"           >images/rgb_1.png</file>
+		<file alias="rgb_2.png"           >images/rgb_2.png</file>
+		<file alias="rgb_3.png"           >images/rgb_3.png</file>
+		<file alias="rgb_4.png"           >images/rgb_4.png</file>
+		<file alias="rgb_5.png"           >images/rgb_5.png</file>
+		<file alias="rgb_6.png"           >images/rgb_6.png</file>
+		<file alias="rgb_7.png"           >images/rgb_7.png</file>
+		<file alias="logo_ENSTA.png"      >images/logo_ENSTA.png</file>
+	</gresource>
+</gresources>
