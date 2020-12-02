@@ -14,11 +14,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "board_window.hh"
 #include <gtkmm/messagedialog.h>
 #include <gdkmm/rgba.h>
 #include <gdkmm/pixbuf.h>
 #include <iostream>
+#include "board_window.hh"
+#include "virtual_board.hh"
 
 static void switch_0_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
 static void switch_1_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
@@ -46,8 +47,9 @@ static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void 
 
 
 //VBWindow::VBWindow(const Glib::RefPtr<Gtk::Application>& application) :
-VBWindow::VBWindow() :
+VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	Gtk::ApplicationWindow(),
+	m_virtual_board(virtual_board),
 	m_state_running(false),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_toolBar1(),
@@ -274,6 +276,8 @@ VBWindow::VBWindow() :
 	update_sensitivities();
 
 	show_all();
+
+	m_virtual_board->send_message_to_vpi(VBMessage::gui_started());
 
 //	m_boxMain.pack_start(led1, Gtk::PACK_SHRINK, 0);
 //	m_boxMain.pack_start(led1, Gtk::PACK_EXPAND_PADDING, 0);

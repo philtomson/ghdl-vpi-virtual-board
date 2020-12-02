@@ -4,6 +4,39 @@
 #include "virtual_board.hh"
 
 
+static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double delay, VirtualBoard *vboard)
+{
+	s_cb_data cb;
+	vpiHandle callback_handle;
+	s_vpi_time time = vboard->get_time(delay);
+
+	cb.reason = cbAfterDelay;
+	cb.cb_rtn = cb_rtn;
+	cb.obj = NULL;
+	cb.time = &time;
+	cb.value = NULL;
+	cb.user_data = (PLI_BYTE8*)vboard;
+
+	callback_handle = vpi_register_cb(&cb);
+	if (!callback_handle) {
+		vpi_printf("\e[31mERROR: Cannot register cbAfterDelay\e[0m\n");
+		exit(EXIT_FAILURE);
+	}
+	vpi_free_object(callback_handle);
+}
+
+
+static void put_integer_value_to_net(vpiHandle net, int value)
+{
+	if (!net)
+		return;
+	s_vpi_value val;
+	val.format = vpiIntVal;
+	val.value.integer = value;
+	vpi_put_value(net, &val, NULL, vpiNoDelay);
+}
+
+
 static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 {
 	vpiHandle iter, top, net;
@@ -24,50 +57,92 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 			//vpi_printf("Net %s[%d] %s\n", net_name, net_width,
 			//		(net_dir == vpiInput) ? "Input" : ((net_dir == vpiOutput) ? "Output" : ((net_dir == vpiInout) ? "Inout" : "")));
 			if (net_dir == vpiInput) {
-				if (strcmp("clk", net_name) == 0 && net_width == 1)
+				if (strcmp("clk", net_name) == 0 && net_width == 1) {
 					vboard.clk_net = net;
-				else if (strcmp("rstn", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net clk[1]\e[0m\n");
+				}
+				else if (strcmp("rstn", net_name) == 0 && net_width == 1) {
 					vboard.rstn_net = net;
-				else if (strcmp("switches", net_name) == 0 && net_width == 16)
+					vpi_printf("\e[32mFound input net rstn[1]\e[0m\n");
+				}
+				else if (strcmp("switches", net_name) == 0 && net_width == 16) {
 					vboard.switches_net = net;
-				else if (strcmp("button_c", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net switches[16]\e[0m\n");
+				}
+				else if (strcmp("button_c", net_name) == 0 && net_width == 1) {
 					vboard.button_c_net = net;
-				else if (strcmp("button_u", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net button_c[1]\e[0m\n");
+				}
+				else if (strcmp("button_u", net_name) == 0 && net_width == 1) {
 					vboard.button_u_net = net;
-				else if (strcmp("button_d", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net button_u[1]\e[0m\n");
+				}
+				else if (strcmp("button_d", net_name) == 0 && net_width == 1) {
 					vboard.button_d_net = net;
-				else if (strcmp("button_r", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net button_d[1]\e[0m\n");
+				}
+				else if (strcmp("button_r", net_name) == 0 && net_width == 1) {
 					vboard.button_r_net = net;
-				else if (strcmp("button_l", net_name) == 0 && net_width == 1)
+					vpi_printf("\e[32mFound input net button_r[1]\e[0m\n");
+				}
+				else if (strcmp("button_l", net_name) == 0 && net_width == 1) {
 					vboard.button_l_net = net;
-				else
+					vpi_printf("\e[32mFound input net button_l[1]\e[0m\n");
+				}
+				else {
+					vpi_printf("\e[33mIgnoring input net %s[%d]\e[0m\n", net_name, net_width);
 					vpi_free_object(net);
+				}
 			}
 			else if (net_dir == vpiOutput) {
-				if (strcmp("leds", net_name) == 0 && net_width == 16)
+				if (strcmp("leds", net_name) == 0 && net_width == 16) {
 					vboard.leds_net = net;
-				else if (strcmp("display0", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net leds[16]\e[0m\n");
+				}
+				else if (strcmp("display0", net_name) == 0 && net_width == 8) {
 					vboard.display0_net = net;
-				else if (strcmp("display1", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display0[8]\e[0m\n");
+				}
+				else if (strcmp("display1", net_name) == 0 && net_width == 8) {
 					vboard.display1_net = net;
-				else if (strcmp("display2", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display1[8]\e[0m\n");
+				}
+				else if (strcmp("display2", net_name) == 0 && net_width == 8) {
 					vboard.display2_net = net;
-				else if (strcmp("display3", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display2[8]\e[0m\n");
+				}
+				else if (strcmp("display3", net_name) == 0 && net_width == 8) {
 					vboard.display3_net = net;
-				else if (strcmp("display4", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display3[8]\e[0m\n");
+				}
+				else if (strcmp("display4", net_name) == 0 && net_width == 8) {
 					vboard.display4_net = net;
-				else if (strcmp("display5", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display4[8]\e[0m\n");
+				}
+				else if (strcmp("display5", net_name) == 0 && net_width == 8) {
 					vboard.display5_net = net;
-				else if (strcmp("display6", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display5[8]\e[0m\n");
+				}
+				else if (strcmp("display6", net_name) == 0 && net_width == 8) {
 					vboard.display6_net = net;
-				else if (strcmp("display7", net_name) == 0 && net_width == 8)
+					vpi_printf("\e[32mFound output net display6[8]\e[0m\n");
+				}
+				else if (strcmp("display7", net_name) == 0 && net_width == 8) {
 					vboard.display7_net = net;
-				else if (strcmp("rgb0", net_name) == 0 && net_width == 3)
+					vpi_printf("\e[32mFound output net display7[8]\e[0m\n");
+				}
+				else if (strcmp("rgb0", net_name) == 0 && net_width == 3) {
 					vboard.rgb0_net = net;
-				else if (strcmp("rgb1", net_name) == 0 && net_width == 3)
+					vpi_printf("\e[32mFound output net rgb0[3]\e[0m\n");
+				}
+				else if (strcmp("rgb1", net_name) == 0 && net_width == 3) {
 					vboard.rgb1_net = net;
-				else
+					vpi_printf("\e[32mFound output net rgb1[3]\e[0m\n");
+				}
+				else {
+					vpi_printf("\e[33mIgnoring output net %s[%d]\e[0m\n", net_name, net_width);
 					vpi_free_object(net);
+				}
 			}
 			else
 				vpi_free_object(net);
@@ -80,6 +155,62 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 }
 
 
+/* set clock to 0 and rstn to 1 and register value change callbacks */
+static PLI_INT32 at_fifteen_cb(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	VBMessage msg;
+
+	vpi_printf("at fifteen\n");
+	
+	put_integer_value_to_net(vboard->clk_net, 0);
+	put_integer_value_to_net(vboard->rstn_net, 1);
+
+	do {
+		msg = vboard->read_message_from_vpi();
+	} while (msg.type() != VBMessage::MSG_GUI_STARTED);
+
+	return 0;
+}
+
+
+/* set clock to 1 */
+static PLI_INT32 at_ten_cb(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+
+	vpi_printf("at ten\n");
+
+	put_integer_value_to_net(vboard->clk_net, 1);
+
+	register_cb_after(at_fifteen_cb, 5e-9, vboard);
+
+	return 0;
+}
+
+
+/* set all inputs to 0 */
+static PLI_INT32 at_five_cb(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+
+	vpi_printf("at five\n");
+
+	put_integer_value_to_net(vboard->clk_net, 0);
+	put_integer_value_to_net(vboard->rstn_net, 0);
+	put_integer_value_to_net(vboard->switches_net, 0);
+	put_integer_value_to_net(vboard->button_c_net, 0);
+	put_integer_value_to_net(vboard->button_u_net, 0);
+	put_integer_value_to_net(vboard->button_d_net, 0);
+	put_integer_value_to_net(vboard->button_r_net, 0);
+	put_integer_value_to_net(vboard->button_l_net, 0);
+
+	register_cb_after(at_ten_cb, 5e-9, vboard);
+
+	return 0;
+}
+
+
 static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
@@ -89,85 +220,51 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	gather_toplevel_IO_nets(*vboard);
 
 	if (!vboard->clk_net) {
-		vpi_printf("ERROR: could not find and input net named \"clk\" of 1 bit!\n");
+		vpi_printf("\e[31mERROR: could not find an input net named \"clk\" of 1 bit!\e[0m\n");
 		return 1;
 	}
-	else
-		vpi_printf("Found input net clk[1]\n");
-	if (vboard->rstn_net)
-		vpi_printf("Found input net rstn[1]\n");
-	else
-		vpi_printf("Input net rstn[1] NOT FOUND\n");
-	if (vboard->switches_net)
-		vpi_printf("Found input net switches[16]\n");
-	else
-		vpi_printf("Input net switches[16] NOT FOUND\n");
-	if (vboard->button_c_net)
-		vpi_printf("Found input net button_c[1]\n");
-	else
-		vpi_printf("Input net button_c[1] NOT FOUND\n");
-	if (vboard->button_u_net)
-		vpi_printf("Found input net button_u[1]\n");
-	else
-		vpi_printf("Input net button_u[1] NOT FOUND\n");
-	if (vboard->button_d_net)
-		vpi_printf("Found input net button_d[1]\n");
-	else
-		vpi_printf("Input net button_d[1] NOT FOUND\n");
-	if (vboard->button_r_net)
-		vpi_printf("Found input net button_r[1]\n");
-	else
-		vpi_printf("Input net button_r[1] NOT FOUND\n");
-	if (vboard->button_l_net)
-		vpi_printf("Found input net button_l[1]\n");
-	else
-		vpi_printf("Input net button_l[1] NOT FOUND\n");
-	if (vboard->leds_net)
-		vpi_printf("Found output net leds[16]\n");
-	else
-		vpi_printf("Output net leds[16] NOT FOUND\n");
-	if (vboard->display0_net)
-		vpi_printf("Found output net display0[8]\n");
-	else
-		vpi_printf("Output net display0[8] NOT FOUND\n");
-	if (vboard->display1_net)
-		vpi_printf("Found output net display1[8]\n");
-	else
-		vpi_printf("Output net display1[8] NOT FOUND\n");
-	if (vboard->display2_net)
-		vpi_printf("Found output net display2[8]\n");
-	else
-		vpi_printf("Output net display2[8] NOT FOUND\n");
-	if (vboard->display3_net)
-		vpi_printf("Found output net display3[8]\n");
-	else
-		vpi_printf("Output net display3[8] NOT FOUND\n");
-	if (vboard->display4_net)
-		vpi_printf("Found output net display4[8]\n");
-	else
-		vpi_printf("Output net display4[8] NOT FOUND\n");
-	if (vboard->display5_net)
-		vpi_printf("Found output net display5[8]\n");
-	else
-		vpi_printf("Output net display5[8] NOT FOUND\n");
-	if (vboard->display6_net)
-		vpi_printf("Found output net display6[8]\n");
-	else
-		vpi_printf("Output net display6[8] NOT FOUND\n");
-	if (vboard->display7_net)
-		vpi_printf("Found output net display7[8]\n");
-	else
-		vpi_printf("Output net display7[8] NOT FOUND\n");
-	if (vboard->rgb0_net)
-		vpi_printf("Found output net rgb0[3]\n");
-	else
-		vpi_printf("Output net rgb0[3] NOT FOUND\n");
-	if (vboard->rgb1_net)
-		vpi_printf("Found output net rgb1[3]\n");
-	else
-		vpi_printf("Output net rgb1[3] NOT FOUND\n");
+	if (!vboard->rstn_net)
+		vpi_printf("\e[33mInput net rstn[1] NOT FOUND\e[0m\n");
+	if (!vboard->switches_net)
+		vpi_printf("\e[33mInput net switches[16] NOT FOUND\e[0m\n");
+	if (!vboard->button_c_net)
+		vpi_printf("\e[33mInput net button_c[1] NOT FOUND\e[0m\n");
+	if (!vboard->button_u_net)
+		vpi_printf("\e[33mInput net button_u[1] NOT FOUND\e[0m\n");
+	if (!vboard->button_d_net)
+		vpi_printf("\e[33mInput net button_d[1] NOT FOUND\e[0m\n");
+	if (!vboard->button_r_net)
+		vpi_printf("\e[33mInput net button_r[1] NOT FOUND\e[0m\n");
+	if (!vboard->button_l_net)
+		vpi_printf("\e[33mInput net button_l[1] NOT FOUND\e[0m\n");
+	if (!vboard->leds_net)
+		vpi_printf("\e[33mOutput net leds[16] NOT FOUND\e[0m\n");
+	if (!vboard->display0_net)
+		vpi_printf("\e[33mOutput net display0[8] NOT FOUND\e[0m\n");
+	if (!vboard->display1_net)
+		vpi_printf("\e[33mOutput net display1[8] NOT FOUND\e[0m\n");
+	if (!vboard->display2_net)
+		vpi_printf("\e[33mOutput net display2[8] NOT FOUND\e[0m\n");
+	if (!vboard->display3_net)
+		vpi_printf("\e[33mOutput net display3[8] NOT FOUND\e[0m\n");
+	if (!vboard->display4_net)
+		vpi_printf("\e[33mOutput net display4[8] NOT FOUND\e[0m\n");
+	if (!vboard->display5_net)
+		vpi_printf("\e[33mOutput net display5[8] NOT FOUND\e[0m\n");
+	if (!vboard->display6_net)
+		vpi_printf("\e[33mOutput net display6[8] NOT FOUND\e[0m\n");
+	if (!vboard->display7_net)
+		vpi_printf("\e[33mOutput net display7[8] NOT FOUND\e[0m\n");
+	if (!vboard->rgb0_net)
+		vpi_printf("\e[33mOutput net rgb0[3] NOT FOUND\e[0m\n");
+	if (!vboard->rgb1_net)
+		vpi_printf("\e[33mOutput net rgb1[3] NOT FOUND\e[0m\n");
+
+	vboard->set_time_resolution(vpi_get(vpiTimePrecision, NULL));
 
 	vboard->start_gui_thread();
+
+	register_cb_after(at_five_cb, 5e-9, vboard);
 
 	return 0;
 }
@@ -199,8 +296,10 @@ static void entry_point_cb()
 	cb.user_data = (PLI_BYTE8*)vboard;
 
 	callback_handle = vpi_register_cb(&cb);
-	if (!callback_handle)
-		vpi_printf("ERROR: Cannot register cbStartOfSimulation call back\n");
+	if (!callback_handle) {
+		vpi_printf("\e[31mERROR: Cannot register cbStartOfSimulation call back\e[0m\n");
+		exit(EXIT_FAILURE);
+	}
 	vpi_free_object(callback_handle);
 
 	/* Register end of simulation callback */
@@ -209,8 +308,10 @@ static void entry_point_cb()
 	cb.user_data = (PLI_BYTE8*)vboard;
 
 	callback_handle = vpi_register_cb(&cb);
-	if (callback_handle == NULL)
-		vpi_printf("ERROR: Cannot register cbEndOfSimulation call back\n");
+	if (!callback_handle) {
+		vpi_printf("\e[31mERROR: Cannot register cbEndOfSimulation call back\e[0m\n");
+		exit(EXIT_FAILURE);
+	}
 	vpi_free_object(callback_handle);
 }
 

@@ -1,8 +1,13 @@
+#include <cmath>
 #include "virtual_board.hh"
 
 VirtualBoard::VirtualBoard() :
 	m_thread(nullptr),
 	m_window(nullptr),
+	m_time_resolution(1.0),
+	m_to_vpi_mutex(),
+	m_to_vpi_condvar(),
+	m_to_vpi_queue(),
 	clk_net(nullptr),
 	rstn_net(nullptr),
 	switches_net(nullptr),
@@ -45,7 +50,7 @@ int VirtualBoard::gui_thread_func()
 {
 	int ret;
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("fr.ensta_bretagne.bollengier.vpi_virtual_board", Gio::APPLICATION_NON_UNIQUE);
-	m_window = new VBWindow();
+	m_window = new VBWindow(this);
 	ret = app->run(*m_window);
 	delete m_window;
 	m_window = nullptr;
@@ -64,6 +69,48 @@ void VirtualBoard::stop_gui_thread()
 	}
 	delete m_thread;
 	m_thread = nullptr;
+}
+
+
+void VirtualBoard::set_time_resolution(int res)
+{
+	m_time_resolution = std::pow(10, -res);
+}
+
+
+s_vpi_time VirtualBoard::get_time(double t)
+{
+	s_vpi_time ts;
+	uint64_t simtime = (uint64_t)(t * m_time_resolution);
+
+	ts.type = vpiSimTime;
+	ts.low = (uint32_t)(simtime & 0xffffffffUL);
+	ts.high = (uint32_t)(simtime >> 32);
+
+	return ts;
+}
+
+
+void VirtualBoard::send_message_to_vpi(const VBMessage& msg)
+{
+	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
+	m_to_vpi_queue.push(msg);
+	m_to_vpi_condvar.notify_one();
+}
+
+
+VBMessage VirtualBoard::read_message_from_vpi()
+{
+	VBMessage msg;
+	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
+
+	while (m_to_vpi_queue.empty())
+		m_to_vpi_condvar.wait(lock);
+
+	msg = m_to_vpi_queue.front();
+	m_to_vpi_queue.pop();
+
+	return msg;
 }
 
 

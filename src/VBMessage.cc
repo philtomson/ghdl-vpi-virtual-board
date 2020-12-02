@@ -1,6 +1,22 @@
 #include "VBMessage.hh"
 
 
+VBMessage::VBMessage() :
+	m_type(VBMessage::MSG_NONE),
+	m_value(0),
+	m_io_name(VBMessage::NONE)
+{
+}
+
+
+VBMessage::VBMessage(const VBMessage& other) :
+	m_type(other.m_type),
+	m_value(other.m_value),
+	m_io_name(other.m_io_name)
+{
+}
+
+
 VBMessage::VBMessage(VBMessage::message_type_t type) :
 	m_type(type),
 	m_value(0),
@@ -116,6 +132,13 @@ VBMessage VBMessage::running()
 VBMessage VBMessage::signals_updated()
 {
 	VBMessage msg(VBMessage::MSG_SIGNALS_UPDATED);
+	return msg;
+}
+
+
+VBMessage VBMessage::gui_started()
+{
+	VBMessage msg(VBMessage::MSG_GUI_STARTED);
 	return msg;
 }
 

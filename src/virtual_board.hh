@@ -22,13 +22,21 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <queue>
+#include <cstdint>
 #include "board_window.hh"
+#include "VBMessage.hh"
 
 
 class VirtualBoard {
 private:
 	std::thread *m_thread;
 	VBWindow    *m_window;
+	double       m_time_resolution;
+	std::mutex   m_to_vpi_mutex;
+	std::condition_variable m_to_vpi_condvar;
+	std::queue<VBMessage> m_to_vpi_queue;
+
 public:
 	vpiHandle    clk_net;
 	vpiHandle    rstn_net;
@@ -55,6 +63,12 @@ public:
 	~VirtualBoard();
 
 	void start_gui_thread();
+
+	void set_time_resolution(int res);
+	s_vpi_time get_time(double t);
+
+	void send_message_to_vpi(const VBMessage& msg);
+	VBMessage read_message_from_vpi(); // blocking
 
 private:
 	int  gui_thread_func();

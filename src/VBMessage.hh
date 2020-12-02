@@ -56,7 +56,8 @@ public:
 	} IO_name_t;
 
 	typedef enum {
-		MSG_EXIT = 1,
+		MSG_NONE = 0,
+		MSG_EXIT,
 		MSG_RUN,
 		MSG_RUN_N, // integer
 		MSG_STOP,
@@ -66,7 +67,8 @@ public:
 		MSG_CLOCK,
 		MSG_STOPPED,
 		MSG_RUNNING,
-		MSG_SIGNALS_UPDATED
+		MSG_SIGNALS_UPDATED,
+		MSG_GUI_STARTED
 	} message_type_t;
 
 private:
@@ -75,6 +77,8 @@ private:
 	IO_name_t      m_io_name;
 
 public:
+	VBMessage();
+	VBMessage(const VBMessage& other);
 	VBMessage(message_type_t type);
 	VBMessage(message_type_t type, unsigned int value);
 	VBMessage(message_type_t type, unsigned int value, IO_name_t io_name);
@@ -94,6 +98,7 @@ public:
 	static VBMessage stopped();
 	static VBMessage running();
 	static VBMessage signals_updated();
+	static VBMessage gui_started();
 };
 
 #endif /* VB_MESSAGE_HH */

@@ -34,6 +34,7 @@
 #include "rgbled.hh"
 #include "segseven.hh"
 
+class VirtualBoard;
 
 class VBWindow : public Gtk::ApplicationWindow
 {
@@ -43,6 +44,7 @@ public:
 	static const guint         simulator_runstop_statusbar_context_id = 20;
 
 protected:
+	VirtualBoard              *m_virtual_board;
 	bool                       m_state_running;
 	Gtk::Box                   m_boxMain;
 	Gtk::Toolbar               m_toolBar1;
@@ -89,7 +91,7 @@ protected:
 
 public:
 	//VBWindow(const Glib::RefPtr<Gtk::Application>& application);
-	VBWindow();
+	VBWindow(VirtualBoard *virtual_board);
 	virtual ~VBWindow();
 
 	void set_freq(int v);
