@@ -24,6 +24,7 @@
 
 class VirtualBoard {
 private:
+	VBWindow *m_window;
 
 public:
 	VirtualBoard();
