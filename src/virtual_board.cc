@@ -10,6 +10,7 @@ VirtualBoard::VirtualBoard() :
 	m_to_vpi_queue(),
 	m_to_gui_mutex(),
 	m_to_gui_queue(),
+	m_period(0.01),
 	clk_net(nullptr),
 	rstn_net(nullptr),
 	switches_net(nullptr),
@@ -147,5 +148,9 @@ VBMessage VirtualBoard::receive_message_to_gui()
 }
 
 
+double VirtualBoard::half_period()
+{
+	return m_period * 0.5;
+}
 
 

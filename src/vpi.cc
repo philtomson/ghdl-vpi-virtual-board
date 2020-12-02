@@ -26,6 +26,26 @@ static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double de
 }
 
 
+static void register_cb_at_last_known_delta(PLI_INT32 (*cb_rtn)(struct t_cb_data *), VirtualBoard *vboard)
+{
+	s_cb_data cb;
+	vpiHandle callback_handle;
+	s_vpi_time time = {.type = vpiSimTime, .high = 0, .low = 0, .real = 0.0};
+
+	cb.reason = cbReadWriteSynch;
+	cb.cb_rtn = cb_rtn;
+	cb.obj = NULL;
+	cb.time = &time;
+	cb.value = NULL;
+	cb.user_data = (PLI_BYTE8*)vboard;
+
+	callback_handle = vpi_register_cb(&cb);
+	if (!callback_handle)
+		vpi_printf("\e[31mERROR: Cannot register cbReadWriteSynch callback!\e[0m\n");
+	vpi_free_object(callback_handle);
+}
+
+
 static void register_value_change_cb(PLI_INT32 (*cb_rtn)(struct t_cb_data *), vpiHandle net, VirtualBoard *vboard)
 {
 	s_cb_data cb;
@@ -294,6 +314,96 @@ static PLI_INT32 on_rgb1_value_change(p_cb_data cb_data)
 }
 
 
+static PLI_INT32 set_clock_callback(p_cb_data cb_data);
+static PLI_INT32 reset_clock_callback(p_cb_data cb_data);
+
+
+static PLI_INT32 main_callback(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	bool advance_time = false;
+	bool exit_sim = false;
+
+	VBMessage msg = vboard->receive_message_to_vpi();
+	switch (msg.type()) {
+		case VBMessage::MSG_CLOCK:
+			advance_time = true;
+			break;
+		case VBMessage::MSG_IO_CHANGED:
+			switch (msg.io_name()) {
+				case VBMessage::SWITCHES:
+					put_integer_value_to_net(vboard->switches_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_RSTN:
+					put_integer_value_to_net(vboard->rstn_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_CENTER:
+					put_integer_value_to_net(vboard->button_c_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_UP:
+					put_integer_value_to_net(vboard->button_u_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_DOWN:
+					put_integer_value_to_net(vboard->button_d_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_RIGHT:
+					put_integer_value_to_net(vboard->button_r_net, msg.value());
+					break;
+				case VBMessage::PUSH_BUTTON_LEFT:
+					put_integer_value_to_net(vboard->button_l_net, msg.value());
+					break;
+				default:
+					break;
+			}
+			break;
+		case VBMessage::MSG_NONE:
+			break;
+		case VBMessage::MSG_EXIT:
+			exit_sim = true;
+			break;
+		case VBMessage::MSG_RUN:
+			break;
+		case VBMessage::MSG_RUN_N:
+			break;
+		case VBMessage::MSG_STOP:
+			break;
+		case VBMessage::MSG_SET_FREQ:
+			break;
+		case VBMessage::MSG_UPDATE_SIGNALS:
+			break;
+		default:
+			printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
+	}
+	
+	if (!exit_sim) {
+		if (advance_time)
+			register_cb_after(set_clock_callback, vboard->half_period(), vboard);
+		else
+			register_cb_at_last_known_delta(main_callback, vboard);
+	}
+
+	return 0;
+}
+
+
+static PLI_INT32 set_clock_callback(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	put_integer_value_to_net(vboard->clk_net, 1);
+	register_cb_after(main_callback, vboard->half_period(), vboard);
+	return 0;
+}
+
+
+static PLI_INT32 reset_clock_callback(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	put_integer_value_to_net(vboard->clk_net, 0);
+	register_cb_at_last_known_delta(main_callback, vboard);
+	return 0;
+}
+
+
 static PLI_INT32 reset_startup_callback(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
@@ -351,6 +461,7 @@ static PLI_INT32 reset_startup_callback(p_cb_data cb_data)
 		case 2:
 			put_integer_value_to_net(vboard->clk_net, 0);
 			put_integer_value_to_net(vboard->rstn_net, 1);
+			register_cb_after(reset_clock_callback, 999980e-9 - vboard->half_period(), vboard);
 			break;
 
 		default:

@@ -21,29 +21,29 @@
 #include "board_window.hh"
 #include "virtual_board.hh"
 
-static void switch_0_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_1_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_2_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_3_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_4_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_5_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_6_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_7_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_8_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_9_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; (void)state; (void)arg; }
-static void switch_10_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
-static void switch_11_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
-static void switch_12_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
-static void switch_13_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
-static void switch_14_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
-static void switch_15_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; (void)state; (void)arg; }
+static void switch_0_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(0,  state); }
+static void switch_1_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(1,  state); }
+static void switch_2_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(2,  state); }
+static void switch_3_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(3,  state); }
+static void switch_4_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(4,  state); }
+static void switch_5_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(5,  state); }
+static void switch_6_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(6,  state); }
+static void switch_7_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(7,  state); }
+static void switch_8_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(8,  state); }
+static void switch_9_callbackfun(const Switch *sw, bool state, void *arg)  { (void)sw; ((VBWindow*)arg)->set_switch(9,  state); }
+static void switch_10_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(10, state); }
+static void switch_11_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(11, state); }
+static void switch_12_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(12, state); }
+static void switch_13_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(13, state); }
+static void switch_14_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(14, state); }
+static void switch_15_callbackfun(const Switch *sw, bool state, void *arg) { (void)sw; ((VBWindow*)arg)->set_switch(15, state); }
 
-static void push_button_center_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; (void)state; (void)arg; }
-static void push_button_right_callbackfun(const PushButton *pb, bool state, void *arg)  { (void)pb; (void)state; (void)arg; }
-static void push_button_top_callbackfun(const PushButton *pb, bool state, void *arg)    { (void)pb; (void)state; (void)arg; }
-static void push_button_left_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; (void)state; (void)arg; }
-static void push_button_bottom_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; (void)state; (void)arg; }
-static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; (void)state; (void)arg; }
+static void push_button_center_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; ((VBWindow*)arg)->set_button_c(state); }
+static void push_button_right_callbackfun(const PushButton *pb, bool state, void *arg)  { (void)pb; ((VBWindow*)arg)->set_button_r(state); }
+static void push_button_top_callbackfun(const PushButton *pb, bool state, void *arg)    { (void)pb; ((VBWindow*)arg)->set_button_u(state); }
+static void push_button_left_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; ((VBWindow*)arg)->set_button_l(state); }
+static void push_button_bottom_callbackfun(const PushButton *pb, bool state, void *arg) { (void)pb; ((VBWindow*)arg)->set_button_d(state); }
+static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void *arg)   { (void)pb; ((VBWindow*)arg)->set_rstn(state); }
 
 
 //VBWindow::VBWindow(const Glib::RefPtr<Gtk::Application>& application) :
@@ -335,6 +335,55 @@ void VBWindow::on_dump_button_clicked()
 void VBWindow::notify_from_vpi()
 {
 	m_dispatcher.emit();
+}
+
+
+void VBWindow::set_switch(int switchnum, bool value)
+{
+	if (switchnum < 0 || switchnum >= 16)
+		return;
+
+	if (value)
+		m_switchesval |= (1 << switchnum);
+	else
+		m_switchesval &= ~(1 << switchnum);
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::SWITCHES, m_switchesval));
+}
+
+
+void VBWindow::set_button_c(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_CENTER, (int)value));
+}
+
+
+void VBWindow::set_button_u(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_UP, (int)value));
+}
+
+
+void VBWindow::set_button_d(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_DOWN, (int)value));
+}
+
+
+void VBWindow::set_button_r(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_RIGHT, (int)value));
+}
+
+
+void VBWindow::set_button_l(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_LEFT, (int)value));
+}
+
+
+void VBWindow::set_rstn(bool value)
+{
+	m_virtual_board->send_message_to_vpi(VBMessage::io_changed(VBMessage::PUSH_BUTTON_RSTN, (int)value));
 }
 
 

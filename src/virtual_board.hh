@@ -38,6 +38,7 @@ private:
 	std::queue<VBMessage> m_to_vpi_queue;
 	std::mutex   m_to_gui_mutex;
 	std::queue<VBMessage> m_to_gui_queue;
+	double       m_period;
 
 public:
 	vpiHandle    clk_net;
@@ -68,6 +69,7 @@ public:
 
 	void set_time_resolution(int res);
 	s_vpi_time get_time(double t);
+	double half_period();
 
 	void send_message_to_vpi(const VBMessage& msg);
 	VBMessage receive_message_to_vpi(); // blocking

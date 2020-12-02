@@ -101,6 +101,13 @@ public:
 	void set_freq(int v);
 
 	void notify_from_vpi();
+	void set_switch(int switchnum, bool value);
+	void set_button_c(bool value);
+	void set_button_u(bool value);
+	void set_button_d(bool value);
+	void set_button_r(bool value);
+	void set_button_l(bool value);
+	void set_rstn(bool value);
 
 protected:
 	/* Gtk callbacks */
