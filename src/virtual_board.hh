@@ -29,6 +29,26 @@ class VirtualBoard {
 private:
 	std::thread *m_thread;
 	VBWindow    *m_window;
+public:
+	vpiHandle    clk_net;
+	vpiHandle    rstn_net;
+	vpiHandle    switches_net;
+	vpiHandle    button_c_net;
+	vpiHandle    button_u_net;
+	vpiHandle    button_d_net;
+	vpiHandle    button_r_net;
+	vpiHandle    button_l_net;
+	vpiHandle    leds_net;
+	vpiHandle    display0_net;
+	vpiHandle    display1_net;
+	vpiHandle    display2_net;
+	vpiHandle    display3_net;
+	vpiHandle    display4_net;
+	vpiHandle    display5_net;
+	vpiHandle    display6_net;
+	vpiHandle    display7_net;
+	vpiHandle    rgb0_net;
+	vpiHandle    rgb1_net;
 
 public:
 	VirtualBoard();

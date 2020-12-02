@@ -13,7 +13,7 @@ SRC += src/vpi.cc
 
 OBJS     = $(addprefix $(BUILD)/, $(notdir $(SRC:.cc=.o)))
 OBJS    += $(BUILD)/resources.o
-CFLAGS  += -W -Wall -O2 -Isrc `pkg-config --cflags gtkmm-3.0`
+CFLAGS  += -W -Wall -Wno-write-strings -O2 -Isrc `pkg-config --cflags gtkmm-3.0`
 LDFLAGS += `pkg-config --libs gtkmm-3.0` -lrt
 GHDL     = ghdl
 CXX      = g++
