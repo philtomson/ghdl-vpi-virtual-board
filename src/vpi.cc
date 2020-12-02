@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vpi_user.h>
+#include <unistd.h>
 #include "virtual_board.hh"
 
 
@@ -9,6 +10,8 @@ PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 
 	vpi_printf("Start of simulation\n");
+	vboard->start_gui_thread();
+	usleep(1000000);
 
 	return 0;
 }

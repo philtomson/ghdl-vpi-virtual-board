@@ -8,6 +8,7 @@ SRC += src/push_button.cc
 SRC += src/switch.cc
 SRC += src/board_window.cc
 SRC += src/virtual_board.cc
+SRC += src/VBMessage.cc
 SRC += src/vpi.cc
 
 OBJS     = $(addprefix $(BUILD)/, $(notdir $(SRC:.cc=.o)))

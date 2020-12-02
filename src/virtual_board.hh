@@ -19,16 +19,26 @@
 
 #include <vpi_user.h>
 #include <gtkmm/application.h>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
 #include "board_window.hh"
 
 
 class VirtualBoard {
 private:
-	VBWindow *m_window;
+	std::thread *m_thread;
+	VBWindow    *m_window;
 
 public:
 	VirtualBoard();
 	~VirtualBoard();
+
+	void start_gui_thread();
+
+private:
+	int  gui_thread_func();
+	void stop_gui_thread();
 };
 
 
