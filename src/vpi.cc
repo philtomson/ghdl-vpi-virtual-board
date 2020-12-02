@@ -63,13 +63,13 @@ static void put_integer_value_to_net(vpiHandle net, int value)
 
 static int get_integer_value_from_net(vpiHandle net)
 {
-	int ret = 0, i, j, w = vpi_get(vpiSize, net);
+	int ret = 0, i, w = vpi_get(vpiSize, net);
 	s_vpi_value val;
 	val.format = vpiBinStrVal;
 	vpi_get_value(net, &val);
-	for (i = 0, j = w - 1; i < w; i++, j--) {
+	for (i = 0; i < w; i++) {
 		ret <<= 1;
-		if (val.value.str[j] == '1')
+		if (val.value.str[i] == '1')
 			ret |= 1;
 	}
 

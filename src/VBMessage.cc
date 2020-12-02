@@ -143,3 +143,38 @@ VBMessage VBMessage::gui_started()
 }
 
 
+const char *VBMessage::type_to_s() const
+{
+	switch (m_type) {
+		case VBMessage::MSG_NONE:
+			return "MSG_NONE";
+		case VBMessage::MSG_EXIT:
+			return "MSG_EXIT";
+		case VBMessage::MSG_RUN:
+			return "MSG_RUN";
+		case VBMessage::MSG_RUN_N:
+			return "MSG_RUN_N";
+		case VBMessage::MSG_STOP:
+			return "MSG_STOP";
+		case VBMessage::MSG_SET_FREQ:
+			return "MSG_SET_FREQ";
+		case VBMessage::MSG_UPDATE_SIGNALS:
+			return "MSG_UPDATE_SIGNALS";
+		case VBMessage::MSG_IO_CHANGED:
+			return "MSG_IO_CHANGED";
+		case VBMessage::MSG_CLOCK:
+			return "MSG_CLOCK";
+		case VBMessage::MSG_STOPPED:
+			return "MSG_STOPPED";
+		case VBMessage::MSG_RUNNING:
+			return "MSG_RUNNING";
+		case VBMessage::MSG_SIGNALS_UPDATED:
+			return "MSG_SIGNALS_UPDATED";
+		case VBMessage::MSG_GUI_STARTED:
+			return "MSG_GUI_STARTED";
+	}
+
+	return "Unknown MSG";
+}
+
+

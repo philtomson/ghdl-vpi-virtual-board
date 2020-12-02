@@ -345,20 +345,20 @@ void VBWindow::on_notification_from_vpi()
 	unsigned int val;
 	unsigned int i, b;
 
-	printf("on_notification_from_vpi():\n");
+	//printf("on_notification_from_vpi():\n");
 	msg = m_virtual_board->receive_message_to_gui();
 	while (go_on) {
 		switch (msg.type()) {
 			case VBMessage::MSG_NONE:
-				printf("MSG_NONE\n");
+				//printf("MSG_NONE\n");
 				go_on = false;
 				break;
 			case VBMessage::MSG_EXIT:
-				printf("MSG_EXIT\n");
+				//printf("MSG_EXIT\n");
 				/* TODO */
 				break;
 			case VBMessage::MSG_IO_CHANGED:
-				printf("MSG_IO_CHANGED\n");
+				//printf("\e[32mMSG_IO_CHANGED\e[0m\n");
 				val = msg.value();
 				switch (msg.io_name()) {
 					case VBMessage::LEDS:
@@ -403,7 +403,7 @@ void VBWindow::on_notification_from_vpi()
 				}
 				break;
 			case VBMessage::MSG_STOPPED:
-				printf("MSG_STOPPED\n");
+				//printf("MSG_STOPPED\n");
 				m_state_running = false;
 				m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
 				m_statusBar.push("Stopped", VBWindow::simulator_runstop_statusbar_context_id);
@@ -413,7 +413,7 @@ void VBWindow::on_notification_from_vpi()
 				m_stepButton.set_sensitive(true);
 				break;
 			case VBMessage::MSG_RUNNING:
-				printf("MSG_RUNNING\n");
+				//printf("MSG_RUNNING\n");
 				m_state_running = true;
 				m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
 				m_statusBar.push("Running", VBWindow::simulator_runstop_statusbar_context_id);
@@ -423,17 +423,16 @@ void VBWindow::on_notification_from_vpi()
 				m_stepButton.set_sensitive(false);
 				break;
 			case VBMessage::MSG_SIGNALS_UPDATED:
-				printf("MSG_SIGNALS_UPDATED\n");
+				//printf("MSG_SIGNALS_UPDATED\n");
 				/* TODO */
 				break;
 			default:
-				printf("Bad MSG: %d\n", msg.type());
+				printf("\e[31mBad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
 				break;
 		}
 		if (go_on)
 			msg = m_virtual_board->receive_message_to_gui();
 	}
-	printf("\n");
 }
 
 

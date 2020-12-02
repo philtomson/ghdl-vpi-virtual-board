@@ -56,6 +56,7 @@ public:
 	message_type_t type() const;
 	unsigned int   value() const;
 	IO_name_t      io_name() const;
+	const char*    type_to_s() const;
 
 	static VBMessage exit();
 	static VBMessage run();
