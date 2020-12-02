@@ -50,7 +50,10 @@ static void push_button_rstn_callbackfun(const PushButton *pb, bool state, void 
 VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	Gtk::ApplicationWindow(),
 	m_virtual_board(virtual_board),
+	m_dispatcher(),
 	m_state_running(false),
+	m_ledsval(0),
+	m_switchesval(0),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_toolBar1(),
 	m_boxBoard(Gtk::Orientation::ORIENTATION_VERTICAL),
@@ -277,6 +280,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 
 	show_all();
 
+	m_dispatcher.connect(sigc::mem_fun(*this, &VBWindow::on_notification_from_vpi));
 	m_virtual_board->send_message_to_vpi(VBMessage::gui_started());
 
 //	m_boxMain.pack_start(led1, Gtk::PACK_SHRINK, 0);
@@ -299,34 +303,6 @@ VBWindow::~VBWindow()
 
 	for (i = 0; i < 5; i++)
 		delete m_pushbuttons[i];
-}
-
-
-void VBWindow::set_LEDs(unsigned short leds)
-{
-	for (int i(0); i < 16; i++, leds >>= 1)
-		m_leds[i]->set_state((bool)(leds & 1));
-}
-
-
-void VBWindow::set_RGB_LEDs(int value, unsigned short lednum)
-{
-	switch (lednum) {
-		case 0:
-			m_rgb_1.set_state(value);
-			break;
-		case 1:
-			m_rgb_2.set_state(value);
-			break;
-	}
-}
-
-
-void VBWindow::set_display(unsigned char dispnum, unsigned char segments)
-{
-	if (dispnum > 7)
-		return;
-	m_displays[dispnum]->set_state(segments);
 }
 
 
@@ -357,33 +333,99 @@ void VBWindow::on_dump_button_clicked()
 }
 
 
-void VBWindow::on_simulator_stopped()
+void VBWindow::notify_from_vpi()
 {
-	m_state_running = false;
-	m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
-	m_statusBar.push("Stopped", VBWindow::simulator_runstop_statusbar_context_id);
-	m_playpauseButton.set_label("Run");
-	m_playpauseButton.set_icon_name("gtk-media-play");
-	m_playpauseButton.set_tooltip_text("Run simulation");
-	update_sensitivities();
+	m_dispatcher.emit();
 }
 
 
-void VBWindow::on_simulator_running()
+void VBWindow::on_notification_from_vpi()
 {
-	m_state_running = true;
-	m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
-	m_statusBar.push("Running", VBWindow::simulator_runstop_statusbar_context_id);
-	m_playpauseButton.set_label("Stop");
-	m_playpauseButton.set_icon_name("gtk-media-pause");
-	m_playpauseButton.set_tooltip_text("Stop simulation");
-	update_sensitivities();
-}
+	VBMessage msg;
+	bool go_on = true;
+	unsigned int val;
+	unsigned int i, b;
 
-
-void VBWindow::update_sensitivities()
-{
-	m_stepButton.set_sensitive(!m_state_running);
+	msg = m_virtual_board->receive_message_to_gui();
+	while (go_on) {
+		switch (msg.type()) {
+			case VBMessage::MSG_NONE:
+				go_on = false;
+				break;
+			case VBMessage::MSG_EXIT:
+				/* TODO */
+				break;
+			case VBMessage::MSG_IO_CHANGED:
+				val = msg.value();
+				switch (msg.io_name()) {
+					case VBMessage::LEDS:
+						for (i = 0, b = 1; i < 16; i++, b <<= 1) {
+							if ((val & b) ^ (m_ledsval & b))
+								m_leds[i]->set_state((bool)((val & b) != 0));
+						}
+						m_ledsval = val;
+						break;
+					case VBMessage::RGB_LED_0:
+						m_rgb_1.set_state(val);
+						break;
+					case VBMessage::RGB_LED_1:
+						m_rgb_2.set_state(val);
+						break;
+					case VBMessage::DISPLAY_0:
+						m_displays[0]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_1:
+						m_displays[1]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_2:
+						m_displays[2]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_3:
+						m_displays[3]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_4:
+						m_displays[4]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_5:
+						m_displays[5]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_6:
+						m_displays[6]->set_state(val);
+						break;
+					case VBMessage::DISPLAY_7:
+						m_displays[7]->set_state(val);
+						break;
+					default:
+						break;
+				}
+				break;
+			case VBMessage::MSG_STOPPED:
+				m_state_running = false;
+				m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
+				m_statusBar.push("Stopped", VBWindow::simulator_runstop_statusbar_context_id);
+				m_playpauseButton.set_label("Run");
+				m_playpauseButton.set_icon_name("gtk-media-play");
+				m_playpauseButton.set_tooltip_text("Run simulation");
+				m_stepButton.set_sensitive(true);
+				break;
+			case VBMessage::MSG_RUNNING:
+				m_state_running = true;
+				m_statusBar.pop(VBWindow::simulator_runstop_statusbar_context_id);
+				m_statusBar.push("Running", VBWindow::simulator_runstop_statusbar_context_id);
+				m_playpauseButton.set_label("Stop");
+				m_playpauseButton.set_icon_name("gtk-media-pause");
+				m_playpauseButton.set_tooltip_text("Stop simulation");
+				m_stepButton.set_sensitive(false);
+				break;
+			case VBMessage::MSG_SIGNALS_UPDATED:
+				/* TODO */
+				break;
+			default:
+				break;
+		}
+		if (go_on)
+			msg = m_virtual_board->receive_message_to_gui();
+	}
 }
 
 

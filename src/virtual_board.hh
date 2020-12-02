@@ -36,6 +36,8 @@ private:
 	std::mutex   m_to_vpi_mutex;
 	std::condition_variable m_to_vpi_condvar;
 	std::queue<VBMessage> m_to_vpi_queue;
+	std::mutex   m_to_gui_mutex;
+	std::queue<VBMessage> m_to_gui_queue;
 
 public:
 	vpiHandle    clk_net;
@@ -68,7 +70,9 @@ public:
 	s_vpi_time get_time(double t);
 
 	void send_message_to_vpi(const VBMessage& msg);
-	VBMessage read_message_from_vpi(); // blocking
+	VBMessage receive_message_to_vpi(); // blocking
+	void send_message_to_gui(const VBMessage& msg);
+	VBMessage receive_message_to_gui(); // non blocking
 
 private:
 	int  gui_thread_func();

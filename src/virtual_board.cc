@@ -8,6 +8,8 @@ VirtualBoard::VirtualBoard() :
 	m_to_vpi_mutex(),
 	m_to_vpi_condvar(),
 	m_to_vpi_queue(),
+	m_to_gui_mutex(),
+	m_to_gui_queue(),
 	clk_net(nullptr),
 	rstn_net(nullptr),
 	switches_net(nullptr),
@@ -49,11 +51,17 @@ void VirtualBoard::start_gui_thread()
 int VirtualBoard::gui_thread_func()
 {
 	int ret;
+
 	Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("fr.ensta_bretagne.bollengier.vpi_virtual_board", Gio::APPLICATION_NON_UNIQUE);
+
 	m_window = new VBWindow(this);
+
 	ret = app->run(*m_window);
-	delete m_window;
+
+	VBWindow *tmp = m_window;
 	m_window = nullptr;
+	delete tmp;
+
 	return ret;
 }
 
@@ -99,7 +107,7 @@ void VirtualBoard::send_message_to_vpi(const VBMessage& msg)
 }
 
 
-VBMessage VirtualBoard::read_message_from_vpi()
+VBMessage VirtualBoard::receive_message_to_vpi()
 {
 	VBMessage msg;
 	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
@@ -112,5 +120,32 @@ VBMessage VirtualBoard::read_message_from_vpi()
 
 	return msg;
 }
+
+
+void VirtualBoard::send_message_to_gui(const VBMessage& msg)
+{
+	if (!m_window)
+		return;
+	std::unique_lock<std::mutex> lock(m_to_gui_mutex);
+	m_to_gui_queue.push(msg);
+	m_window->notify_from_vpi();
+}
+
+
+VBMessage VirtualBoard::receive_message_to_gui()
+{
+	VBMessage msg;
+	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
+
+	if (m_to_gui_queue.empty())
+		return msg;
+
+	msg = m_to_vpi_queue.front();
+	m_to_vpi_queue.pop();
+
+	return msg;
+}
+
+
 
 

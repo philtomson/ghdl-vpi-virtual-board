@@ -26,6 +26,30 @@ static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double de
 }
 
 
+static void register_value_change_cb(PLI_INT32 (*cb_rtn)(struct t_cb_data *), vpiHandle net, VirtualBoard *vboard)
+{
+	s_cb_data cb;
+	s_vpi_time tim;
+	s_vpi_value val;
+	vpiHandle callback_handle;
+
+	tim.type = vpiSuppressTime;
+	val.format = vpiSuppressVal;
+
+	cb.reason = cbValueChange;
+	cb.cb_rtn = cb_rtn;
+	cb.obj    = net;
+	cb.time   = &tim;
+	cb.value  = &val;
+	cb.user_data = (PLI_BYTE8*)vboard;
+
+	callback_handle = vpi_register_cb(&cb);
+	if (!callback_handle)
+		vpi_printf ("\e[31mERROR: Cannot register cbValueChange call back\e[0m\n");
+	vpi_free_object(callback_handle);
+}
+
+
 static void put_integer_value_to_net(vpiHandle net, int value)
 {
 	if (!net)
@@ -34,6 +58,22 @@ static void put_integer_value_to_net(vpiHandle net, int value)
 	val.format = vpiIntVal;
 	val.value.integer = value;
 	vpi_put_value(net, &val, NULL, vpiNoDelay);
+}
+
+
+static int get_integer_value_from_net(vpiHandle net)
+{
+	int ret = 0, i, j, w = vpi_get(vpiSize, net);
+	s_vpi_value val;
+	val.format = vpiBinStrVal;
+	vpi_get_value(net, &val);
+	for (i = 0, j = w - 1; i < w; i++, j--) {
+		ret <<= 1;
+		if (val.value.str[j] == '1')
+			ret |= 1;
+	}
+
+	return ret;
 }
 
 
@@ -155,6 +195,105 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 }
 
 
+static PLI_INT32 on_leds_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->leds_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::LEDS, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display0_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display0_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_0, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display1_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display1_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_1, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display2_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display2_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_2, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display3_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display3_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_3, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display4_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display4_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_4, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display5_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display5_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_5, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display6_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display6_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_6, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_display7_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->display7_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_7, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_rgb0_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->rgb0_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::RGB_LED_0, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_rgb1_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->rgb1_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::RGB_LED_1, v));
+	return 0;
+}
+
+
 /* set clock to 0 and rstn to 1 and register value change callbacks */
 static PLI_INT32 at_fifteen_cb(p_cb_data cb_data)
 {
@@ -167,8 +306,31 @@ static PLI_INT32 at_fifteen_cb(p_cb_data cb_data)
 	put_integer_value_to_net(vboard->rstn_net, 1);
 
 	do {
-		msg = vboard->read_message_from_vpi();
+		msg = vboard->receive_message_to_vpi();
 	} while (msg.type() != VBMessage::MSG_GUI_STARTED);
+
+	if (vboard->leds_net)
+		register_value_change_cb(on_leds_value_change, vboard->leds_net, vboard);
+	if (vboard->display0_net)
+		register_value_change_cb(on_display0_value_change, vboard->display0_net, vboard);
+	if (vboard->display1_net)
+		register_value_change_cb(on_display1_value_change, vboard->display1_net, vboard);
+	if (vboard->display2_net)
+		register_value_change_cb(on_display2_value_change, vboard->display2_net, vboard);
+	if (vboard->display3_net)
+		register_value_change_cb(on_display3_value_change, vboard->display3_net, vboard);
+	if (vboard->display4_net)
+		register_value_change_cb(on_display4_value_change, vboard->display4_net, vboard);
+	if (vboard->display5_net)
+		register_value_change_cb(on_display5_value_change, vboard->display5_net, vboard);
+	if (vboard->display6_net)
+		register_value_change_cb(on_display6_value_change, vboard->display6_net, vboard);
+	if (vboard->display7_net)
+		register_value_change_cb(on_display7_value_change, vboard->display7_net, vboard);
+	if (vboard->rgb0_net)
+		register_value_change_cb(on_rgb0_value_change, vboard->rgb0_net, vboard);
+	if (vboard->rgb1_net)
+		register_value_change_cb(on_rgb1_value_change, vboard->rgb1_net, vboard);
 
 	return 0;
 }

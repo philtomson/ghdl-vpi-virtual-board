@@ -28,6 +28,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/separatortoolitem.h>
 #include <gtkmm/image.h>
+#include <glibmm/dispatcher.h>
 #include "switch.hh"
 #include "push_button.hh"
 #include "led.hh"
@@ -45,7 +46,10 @@ public:
 
 protected:
 	VirtualBoard              *m_virtual_board;
+	Glib::Dispatcher           m_dispatcher;
 	bool                       m_state_running;
+	unsigned int               m_ledsval;
+	unsigned int               m_switchesval;
 	Gtk::Box                   m_boxMain;
 	Gtk::Toolbar               m_toolBar1;
 	Gtk::Box                   m_boxBoard;
@@ -95,13 +99,8 @@ public:
 	virtual ~VBWindow();
 
 	void set_freq(int v);
-	void set_LEDs(unsigned short leds);
-	void set_RGB_LEDs(int value, unsigned short lednum);
-	void set_display(unsigned char dispnum, unsigned char segments);
 
-	/* Simulator callbacks */
-	void on_simulator_stopped();
-	void on_simulator_running();
+	void notify_from_vpi();
 
 protected:
 	/* Gtk callbacks */
@@ -111,6 +110,8 @@ protected:
 	void on_dump_button_clicked();
 
 	void update_sensitivities();
+
+	void on_notification_from_vpi();
 };
 
 
