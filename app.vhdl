@@ -225,7 +225,7 @@ use ieee.numeric_std.all;
 entity test is
 	generic ( cnt_max : natural := 50 );
 	port ( clk            : in  std_logic;
-		   rstnn          : in  std_logic;
+		   rstn           : in  std_logic;
 	       switches       : in  std_logic_vector(15 downto 0);
 	       leds           : out std_logic_vector(15 downto 0);
 		   button_l       : in  std_logic;
@@ -269,7 +269,6 @@ architecture rtl of test is
 	signal blink       : std_logic;
 	signal bcnt        : integer range 0 to cnt_max - 1;
 	signal rgbcnt      : std_logic_vector(3 downto 0);
-	signal rstn : std_logic;
 begin
 
 	cntv <= std_logic_vector(to_unsigned(cnt, 14));
@@ -302,7 +301,8 @@ begin
 			end if;
 		end if;
 	end process;
-	leds(14 downto 0) <= ('0' & cntv) when display_cnt = '1' else sr;
+	--leds(14 downto 0) <= ('0' & cntv) when display_cnt = '1' else sr;
+	leds(14 downto 0) <= not(switches(14 downto 0));
 	leds(15) <= blink;
 
 	-- blink counter

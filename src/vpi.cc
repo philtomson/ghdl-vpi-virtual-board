@@ -294,80 +294,70 @@ static PLI_INT32 on_rgb1_value_change(p_cb_data cb_data)
 }
 
 
-/* set clock to 0 and rstn to 1 and register value change callbacks */
-static PLI_INT32 at_fifteen_cb(p_cb_data cb_data)
+static PLI_INT32 reset_startup_callback(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	static int startup_cnt = 0;
 	VBMessage msg;
 
-	vpi_printf("at fifteen\n");
-	
-	put_integer_value_to_net(vboard->clk_net, 0);
-	put_integer_value_to_net(vboard->rstn_net, 1);
+	switch (startup_cnt) {
+		/* set all inputs to 0 */
+		case 0:
+			do {
+				msg = vboard->receive_message_to_vpi();
+			} while (msg.type() != VBMessage::MSG_GUI_STARTED);
 
-	do {
-		msg = vboard->receive_message_to_vpi();
-	} while (msg.type() != VBMessage::MSG_GUI_STARTED);
+			if (vboard->leds_net)
+				register_value_change_cb(on_leds_value_change, vboard->leds_net, vboard);
+			if (vboard->display0_net)
+				register_value_change_cb(on_display0_value_change, vboard->display0_net, vboard);
+			if (vboard->display1_net)
+				register_value_change_cb(on_display1_value_change, vboard->display1_net, vboard);
+			if (vboard->display2_net)
+				register_value_change_cb(on_display2_value_change, vboard->display2_net, vboard);
+			if (vboard->display3_net)
+				register_value_change_cb(on_display3_value_change, vboard->display3_net, vboard);
+			if (vboard->display4_net)
+				register_value_change_cb(on_display4_value_change, vboard->display4_net, vboard);
+			if (vboard->display5_net)
+				register_value_change_cb(on_display5_value_change, vboard->display5_net, vboard);
+			if (vboard->display6_net)
+				register_value_change_cb(on_display6_value_change, vboard->display6_net, vboard);
+			if (vboard->display7_net)
+				register_value_change_cb(on_display7_value_change, vboard->display7_net, vboard);
+			if (vboard->rgb0_net)
+				register_value_change_cb(on_rgb0_value_change, vboard->rgb0_net, vboard);
+			if (vboard->rgb1_net)
+				register_value_change_cb(on_rgb1_value_change, vboard->rgb1_net, vboard);
 
-	if (vboard->leds_net)
-		register_value_change_cb(on_leds_value_change, vboard->leds_net, vboard);
-	if (vboard->display0_net)
-		register_value_change_cb(on_display0_value_change, vboard->display0_net, vboard);
-	if (vboard->display1_net)
-		register_value_change_cb(on_display1_value_change, vboard->display1_net, vboard);
-	if (vboard->display2_net)
-		register_value_change_cb(on_display2_value_change, vboard->display2_net, vboard);
-	if (vboard->display3_net)
-		register_value_change_cb(on_display3_value_change, vboard->display3_net, vboard);
-	if (vboard->display4_net)
-		register_value_change_cb(on_display4_value_change, vboard->display4_net, vboard);
-	if (vboard->display5_net)
-		register_value_change_cb(on_display5_value_change, vboard->display5_net, vboard);
-	if (vboard->display6_net)
-		register_value_change_cb(on_display6_value_change, vboard->display6_net, vboard);
-	if (vboard->display7_net)
-		register_value_change_cb(on_display7_value_change, vboard->display7_net, vboard);
-	if (vboard->rgb0_net)
-		register_value_change_cb(on_rgb0_value_change, vboard->rgb0_net, vboard);
-	if (vboard->rgb1_net)
-		register_value_change_cb(on_rgb1_value_change, vboard->rgb1_net, vboard);
+			put_integer_value_to_net(vboard->clk_net, 0);
+			put_integer_value_to_net(vboard->rstn_net, 0);
+			put_integer_value_to_net(vboard->switches_net, 0);
+			put_integer_value_to_net(vboard->button_c_net, 0);
+			put_integer_value_to_net(vboard->button_u_net, 0);
+			put_integer_value_to_net(vboard->button_d_net, 0);
+			put_integer_value_to_net(vboard->button_r_net, 0);
+			put_integer_value_to_net(vboard->button_l_net, 0);
+			register_cb_after(reset_startup_callback, 5e-9, vboard);
+			break;
 
-	return 0;
-}
+		/* set clock to 1*/
+		case 1:
+			put_integer_value_to_net(vboard->clk_net, 1);
+			register_cb_after(reset_startup_callback, 5e-9, vboard);
+			break;
 
+		/* set clock to 0, rstn to 1, register main callback */
+		case 2:
+			put_integer_value_to_net(vboard->clk_net, 0);
+			put_integer_value_to_net(vboard->rstn_net, 1);
+			break;
 
-/* set clock to 1 */
-static PLI_INT32 at_ten_cb(p_cb_data cb_data)
-{
-	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+		default:
+			vpi_printf("\e[31mERROR: should not enter this callback again!\3[0m\n");
+	}
 
-	vpi_printf("at ten\n");
-
-	put_integer_value_to_net(vboard->clk_net, 1);
-
-	register_cb_after(at_fifteen_cb, 5e-9, vboard);
-
-	return 0;
-}
-
-
-/* set all inputs to 0 */
-static PLI_INT32 at_five_cb(p_cb_data cb_data)
-{
-	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
-
-	vpi_printf("at five\n");
-
-	put_integer_value_to_net(vboard->clk_net, 0);
-	put_integer_value_to_net(vboard->rstn_net, 0);
-	put_integer_value_to_net(vboard->switches_net, 0);
-	put_integer_value_to_net(vboard->button_c_net, 0);
-	put_integer_value_to_net(vboard->button_u_net, 0);
-	put_integer_value_to_net(vboard->button_d_net, 0);
-	put_integer_value_to_net(vboard->button_r_net, 0);
-	put_integer_value_to_net(vboard->button_l_net, 0);
-
-	register_cb_after(at_ten_cb, 5e-9, vboard);
+	startup_cnt++;
 
 	return 0;
 }
@@ -426,7 +416,7 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 
 	vboard->start_gui_thread();
 
-	register_cb_after(at_five_cb, 5e-9, vboard);
+	register_cb_after(reset_startup_callback, 5e-9, vboard);
 
 	return 0;
 }

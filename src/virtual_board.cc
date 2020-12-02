@@ -109,7 +109,7 @@ void VirtualBoard::send_message_to_vpi(const VBMessage& msg)
 
 VBMessage VirtualBoard::receive_message_to_vpi()
 {
-	VBMessage msg;
+	VBMessage msg(VBMessage::MSG_NONE);
 	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
 
 	while (m_to_vpi_queue.empty())
@@ -134,7 +134,7 @@ void VirtualBoard::send_message_to_gui(const VBMessage& msg)
 
 VBMessage VirtualBoard::receive_message_to_gui()
 {
-	VBMessage msg;
+	VBMessage msg(VBMessage::MSG_NONE);
 	std::unique_lock<std::mutex> lock(m_to_vpi_mutex);
 
 	if (m_to_gui_queue.empty())

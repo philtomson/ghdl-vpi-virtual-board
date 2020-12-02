@@ -109,8 +109,6 @@ protected:
 	void on_freq_value_changed();
 	void on_dump_button_clicked();
 
-	void update_sensitivities();
-
 	void on_notification_from_vpi();
 };
 
