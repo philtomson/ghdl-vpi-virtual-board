@@ -34,11 +34,11 @@
 #include "led.hh"
 #include "rgbled.hh"
 #include "segseven.hh"
+#include "InspectorWindow.hh"
 
 class VirtualBoard;
 
-class VBWindow : public Gtk::ApplicationWindow
-{
+class VBWindow : public Gtk::ApplicationWindow {
 public:
 	static const guint         toolitem_statusbar_context_id = 40;
 	static const guint         simulator_statusbar_context_id = 30;
@@ -89,6 +89,7 @@ protected:
 	RGBLed                     m_rgb_1;
 	PushButton                 m_rstnbnt;
 	RGBLed                     m_rgb_2;
+	InspectorWindow            m_inspector_window;
 	Gtk::Label                *m_labels[16];
 	Switch                    *m_switches[16];
 	Led                       *m_leds[16];
@@ -118,7 +119,7 @@ protected:
 	void on_step_button_clicked();
 	void on_freq_value_changed();
 	void on_dump_button_clicked();
-	bool on_delete_event(GdkEventAny* any_event);
+	bool on_my_delete_event(GdkEventAny* any_event);
 
 	void on_notification_from_vpi();
 };

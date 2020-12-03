@@ -92,7 +92,8 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_boxlogo(),
 	m_rgb_1(),
 	m_rstnbnt(PushButton::PUSH_BUTTON_PADS_HORIZONTAL, false),
-	m_rgb_2()
+	m_rgb_2(),
+	m_inspector_window(virtual_board)
 {
 	int i;
 
@@ -295,6 +296,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_boxBoard.pack_end(m_boxSwitchAndLed, Gtk::PACK_SHRINK, 0);
 
 	m_dispatcher.connect(sigc::mem_fun(*this, &VBWindow::on_notification_from_vpi));
+	signal_delete_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_delete_event));
 
 	show_all();
 
@@ -347,10 +349,11 @@ void VBWindow::on_freq_value_changed()
 void VBWindow::on_dump_button_clicked()
 {
 	m_virtual_board->send_message_to_vpi(VBMessage::update_signals());
+	m_inspector_window.present();
 }
 
 
-bool VBWindow::on_delete_event(GdkEventAny* any_event)
+bool VBWindow::on_my_delete_event(GdkEventAny* any_event)
 {
 	(void)any_event;
 	m_closing = true;
