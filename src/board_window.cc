@@ -214,11 +214,13 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 
 	m_boxDisplaysRight.set_margin_left(20);
 
+	std::string simulator_version = std::string(m_virtual_board->simulator_version);
+	simulator_version = simulator_version.substr(0, simulator_version.find(" ("));
 	m_board_name.set_label(
 			std::string("VPI Virtual Board on ") +
 			std::string(m_virtual_board->simulator_name) +
 			std::string(" ") +
-			std::string(m_virtual_board->simulator_version));
+			std::string(simulator_version));
 	m_board_name.override_color(Gdk::RGBA("white"));
 	//m_board_name.set_justify(Gtk::JUSTIFY_CENTER);
 	m_board_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);

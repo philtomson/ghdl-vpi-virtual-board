@@ -99,9 +99,7 @@ void VirtualBoard::stop_gui_thread()
 	if (!m_thread)
 		return;
 	if (m_thread->joinable()) {
-		printf("Joining...\n");
 		m_thread->join();
-		printf("Joined\n");
 	}
 	delete m_thread;
 	m_thread = nullptr;

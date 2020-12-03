@@ -530,7 +530,12 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 
-	vpi_printf("Start of simulation\n");
+	vpi_printf("--------------------------------------------------------------------------------\n");
+	vpi_printf("VPI Virtual Board\n");
+	vpi_printf("Copyright (C) 2020 Théotime Bollengier\n");
+	vpi_printf("VPI Virtual Board is free software, covered by the GNU General Public License.\n");
+	vpi_printf("https://gitlab.ensta-bretagne.fr/bollenth/ghdl-vpi-virtual-board\n");
+	vpi_printf("--------------------------------------------------------------------------------\n");
 
 	s_vpi_vlog_info info;
 	vpi_get_vlog_info(&info);
@@ -539,10 +544,8 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 
 	gather_toplevel_IO_nets(*vboard);
 
-	if (!vboard->clk_net) {
-		vpi_printf("\e[31mERROR: could not find an input net named \"clk\" of 1 bit!\e[0m\n");
-		return 1;
-	}
+	if (!vboard->clk_net)
+		vpi_printf("\e[33mInput net clk[1] NOT FOUND\e[0m\n");
 	if (!vboard->rstn_net)
 		vpi_printf("\e[33mInput net rstn[1] NOT FOUND\e[0m\n");
 	if (!vboard->switches_net)
@@ -594,8 +597,7 @@ static PLI_INT32 end_of_sim_cb(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 
-	vpi_printf("End of simulation\n");
-
+	vpi_printf("Simulation ended.\n");
 
 	if (vboard) {
 		vboard->send_message_to_gui(VBMessage::exit());
