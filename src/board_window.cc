@@ -147,6 +147,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 
 	m_freq_toolitem.set_margin_left(5);
 	m_freq_spinbutton.set_range(1, 1000);
+	m_freq_spinbutton.set_value(1000);
 	m_freq_spinbutton.set_digits(0);
 	m_freq_spinbutton.set_numeric();
 	m_freq_spinbutton.set_increments(1, 10);
@@ -223,7 +224,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_board_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	m_box_names.pack_start(m_board_name, Gtk::PACK_EXPAND_WIDGET, 0);
 
-	m_design_name.set_label(std::string("Top: [") + m_virtual_board->design_top_unit_name + std::string("]"));
+	m_design_name.set_label(std::string("[") + m_virtual_board->design_top_unit_name + std::string("]"));
 	m_design_name.override_color(Gdk::RGBA("white"));
 	//m_design_name.set_justify(Gtk::JUSTIFY_RIGHT);
 	m_design_name.set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
@@ -323,29 +324,27 @@ VBWindow::~VBWindow()
 void VBWindow::on_run_button_clicked()
 {
 	if (m_state_running)
-		printf("Stop\n");
+		m_virtual_board->send_message_to_vpi(VBMessage::stop());
 	else
-		printf("Run\n");
+		m_virtual_board->send_message_to_vpi(VBMessage::run());
 }
 
 
 void VBWindow::on_step_button_clicked()
 {
-	printf("Step\n");
-	m_virtual_board->send_message_to_vpi(VBMessage::clock());
+	m_virtual_board->send_message_to_vpi(VBMessage::run_n((unsigned int)m_nstep_spinbutton.get_value()));
 }
 
 
 void VBWindow::on_freq_value_changed()
 {
-	printf("freq: %d\n", (int)m_freq_spinbutton.get_value());
+	m_virtual_board->send_message_to_vpi(VBMessage::set_freq((unsigned int)m_freq_spinbutton.get_value()));
 }
 
 
 void VBWindow::on_dump_button_clicked()
 {
-	printf("Pouet\n");
-	m_virtual_board->send_message_to_vpi(VBMessage::exit());
+	m_virtual_board->send_message_to_vpi(VBMessage::update_signals());
 }
 
 
@@ -416,20 +415,20 @@ void VBWindow::set_rstn(bool value)
 void VBWindow::on_notification_from_vpi()
 {
 	VBMessage msg;
-	bool go_on = true;
+	bool try_to_read_other_messages = true;
 	unsigned int val;
 	unsigned int i, b;
 
 	//printf("on_notification_from_vpi():\n");
 	msg = m_virtual_board->receive_message_to_gui();
-	while (go_on) {
+	while (try_to_read_other_messages) {
 		switch (msg.type()) {
 			case VBMessage::MSG_NONE:
 				//printf("MSG_NONE\n");
-				go_on = false;
+				try_to_read_other_messages = false;
 				break;
 			case VBMessage::MSG_EXIT:
-				go_on = false;
+				try_to_read_other_messages = false;
 				if (!m_closing)
 					get_application()->quit();
 				break;
@@ -499,14 +498,15 @@ void VBWindow::on_notification_from_vpi()
 				m_stepButton.set_sensitive(false);
 				break;
 			case VBMessage::MSG_SIGNALS_UPDATED:
-				//printf("MSG_SIGNALS_UPDATED\n");
+				printf("MSG_SIGNALS_UPDATED\n");
 				/* TODO */
 				break;
 			default:
 				printf("\e[31mBad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
+				try_to_read_other_messages = false;
 				break;
 		}
-		if (go_on)
+		if (try_to_read_other_messages)
 			msg = m_virtual_board->receive_message_to_gui();
 	}
 }

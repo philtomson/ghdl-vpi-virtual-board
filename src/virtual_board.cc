@@ -1,4 +1,22 @@
+/* Copyright (C) 2020 Théotime Bollengier <theotime.bollengier@ensta-bretagne.fr>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <cmath>
+#include <errno.h>
+#include <signal.h>
 #include "virtual_board.hh"
 
 VirtualBoard::VirtualBoard() :
@@ -10,7 +28,10 @@ VirtualBoard::VirtualBoard() :
 	m_to_vpi_queue(),
 	m_to_gui_mutex(),
 	m_to_gui_queue(),
-	m_period(0.01),
+	m_period(0.001),
+	m_timer(0),
+	m_timer_is_running(false),
+	cycles_to_go(0),
 	design_top_unit_name(),
 	simulator_name(),
 	simulator_version(),
@@ -34,11 +55,14 @@ VirtualBoard::VirtualBoard() :
 	rgb0_net(nullptr),
 	rgb1_net(nullptr)
 {
+	create_timer();
 }
 
 
 VirtualBoard::~VirtualBoard()
 {
+	if (m_timer)
+		timer_delete(m_timer);
 	stop_gui_thread();
 }
 
@@ -154,6 +178,71 @@ VBMessage VirtualBoard::receive_message_to_gui()
 double VirtualBoard::half_period()
 {
 	return m_period * 0.5;
+}
+
+
+static void timer_notification_callback(union sigval val)
+{
+	((VirtualBoard*)val.sival_ptr)->send_message_to_vpi(VBMessage::clock());
+}
+
+
+void VirtualBoard::create_timer()
+{
+	struct sigevent sevp;
+	memset(&sevp, 0, sizeof(struct sigevent));
+	sevp.sigev_notify = SIGEV_THREAD;
+	sevp.sigev_notify_attributes = NULL;
+	sevp.sigev_value.sival_ptr = this;
+	sevp.sigev_notify_function = timer_notification_callback;
+
+	if (timer_create(CLOCK_MONOTONIC, &sevp, &m_timer))
+		throw std::runtime_error(std::string("timer_create(): ") + std::string(strerror(errno)));
+}
+
+
+void VirtualBoard::set_timer_frequency(int freq)
+{
+	if (freq < 1)
+		freq = 1;
+	else if (freq > 1000)
+		freq = 1000;
+	m_period = 1.0 / (double)freq;
+	if (m_timer_is_running)
+		start_timer(); // to set the new frequency
+}
+
+
+void VirtualBoard::start_timer()
+{
+	const long int period_nano = (long int)(1000000000.0 * m_period);
+	const time_t sec = period_nano / 1000000000L;
+	const long  nsec = period_nano % 1000000000L;
+	const struct itimerspec new_value = {
+		.it_interval = {.tv_sec = sec, .tv_nsec = nsec},
+		.it_value = {.tv_sec = sec, .tv_nsec = nsec}
+	};
+	if (timer_settime(m_timer, 0, &new_value, NULL))
+		throw std::runtime_error(std::string("timer_settime(): ") + std::string(strerror(errno)));
+	m_timer_is_running = true;
+}
+
+
+void VirtualBoard::stop_timer()
+{
+	const struct itimerspec new_value = {
+		.it_interval = {.tv_sec = 0, .tv_nsec = 0},
+		.it_value = {.tv_sec = 0, .tv_nsec = 0}
+	};
+	if (timer_settime(m_timer, 0, &new_value, NULL))
+		throw std::runtime_error(std::string("timer_settime(): ") + std::string(strerror(errno)));
+	m_timer_is_running = false;
+}
+
+
+bool VirtualBoard::is_running()
+{
+	return m_timer_is_running;
 }
 
 

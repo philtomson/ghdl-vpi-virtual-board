@@ -25,6 +25,7 @@
 #include <queue>
 #include <string>
 #include <cstdint>
+#include <time.h>
 #include "board_window.hh"
 #include "VBMessage.hh"
 
@@ -40,8 +41,11 @@ private:
 	std::mutex   m_to_gui_mutex;
 	std::queue<VBMessage> m_to_gui_queue;
 	double       m_period;
+	timer_t      m_timer;
+	bool         m_timer_is_running;
 
 public:
+	long         cycles_to_go;
 	std::string  design_top_unit_name;
 	std::string  simulator_name;
 	std::string  simulator_version;
@@ -75,6 +79,11 @@ public:
 	s_vpi_time get_time(double t);
 	double half_period();
 
+	void set_timer_frequency(int freq);
+	void start_timer();
+	void stop_timer();
+	bool is_running();
+
 	void send_message_to_vpi(const VBMessage& msg);
 	VBMessage receive_message_to_vpi(); // blocking
 	void send_message_to_gui(const VBMessage& msg);
@@ -83,6 +92,7 @@ public:
 private:
 	int  gui_thread_func();
 	void stop_gui_thread();
+	void create_timer();
 };
 
 

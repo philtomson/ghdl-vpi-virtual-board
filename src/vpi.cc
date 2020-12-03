@@ -1,3 +1,19 @@
+/* Copyright (C) 2020 Théotime Bollengier <theotime.bollengier@ensta-bretagne.fr>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <cstdlib>
 #include <cstdio>
 #include <vpi_user.h>
@@ -331,8 +347,17 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 		VBMessage msg = vboard->receive_message_to_vpi();
 		switch (msg.type()) {
 			case VBMessage::MSG_CLOCK:
-				wait_other_messages = false;
-				advance_time = true;
+				if (vboard->is_running()) {
+					if (vboard->cycles_to_go) {
+						vboard->cycles_to_go--;
+						if (vboard->cycles_to_go == 0) {
+							vboard->stop_timer();
+							vboard->send_message_to_gui(VBMessage::stopped());
+						}
+						wait_other_messages = false;
+						advance_time = true;
+					}
+				}
 				break;
 			case VBMessage::MSG_IO_CHANGED:
 				wait_other_messages = false;
@@ -369,14 +394,33 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 				exit_sim = true;
 				break;
 			case VBMessage::MSG_RUN:
+				vboard->cycles_to_go = -1;
+				vboard->start_timer();
+				vboard->send_message_to_gui(VBMessage::running());
 				break;
 			case VBMessage::MSG_RUN_N:
+				/* run the first cycle now without waiting for the first timer notification */
+				if (msg.value() <= 1) {
+					vboard->cycles_to_go = 0;
+				}
+				else {
+					vboard->cycles_to_go = msg.value() - 1;
+					vboard->start_timer();
+					vboard->send_message_to_gui(VBMessage::running());
+				}
+				wait_other_messages = false;
+				advance_time = true;
 				break;
 			case VBMessage::MSG_STOP:
+				vboard->cycles_to_go = 0;
+				vboard->stop_timer();
+				vboard->send_message_to_gui(VBMessage::stopped());
 				break;
 			case VBMessage::MSG_SET_FREQ:
+				vboard->set_timer_frequency(msg.value());
 				break;
 			case VBMessage::MSG_UPDATE_SIGNALS:
+				vboard->send_message_to_gui(VBMessage::signals_updated());
 				break;
 			default:
 				printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());

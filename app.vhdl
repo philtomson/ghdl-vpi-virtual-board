@@ -223,7 +223,7 @@ use ieee.numeric_std.all;
 
 
 entity test is
-	generic ( cnt_max : natural := 50 );
+	generic ( cnt_max : natural := 500 );
 	port ( clk            : in  std_logic;
 		   rstn           : in  std_logic;
 	       switches       : in  std_logic_vector(15 downto 0);
@@ -301,8 +301,8 @@ begin
 			end if;
 		end if;
 	end process;
-	--leds(14 downto 0) <= ('0' & cntv) when display_cnt = '1' else sr;
-	leds(14 downto 0) <= "100110000001111";
+	leds(14 downto 0) <= ('0' & cntv) when display_cnt = '1' else sr;
+	--leds(14 downto 0) <= "100110000001111";
 	leds(15) <= blink;
 
 	-- blink counter
