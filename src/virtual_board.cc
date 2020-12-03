@@ -35,6 +35,7 @@ VirtualBoard::VirtualBoard() :
 	design_top_unit_name(),
 	simulator_name(),
 	simulator_version(),
+	top_module(),
 	clk_net(nullptr),
 	rstn_net(nullptr),
 	switches_net(nullptr),

@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <vpi_user.h>
 #include "virtual_board.hh"
+#include "Instance.hh"
 
 
 static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double delay, VirtualBoard *vboard)
@@ -38,7 +39,7 @@ static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double de
 		vpi_printf("\e[31mERROR: Cannot register cbAfterDelay\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	vpi_free_object(callback_handle);
+	//vpi_free_object(callback_handle);
 }
 
 
@@ -58,7 +59,7 @@ static void register_cb_at_last_known_delta(PLI_INT32 (*cb_rtn)(struct t_cb_data
 	callback_handle = vpi_register_cb(&cb);
 	if (!callback_handle)
 		vpi_printf("\e[31mERROR: Cannot register cbReadWriteSynch callback!\e[0m\n");
-	vpi_free_object(callback_handle);
+	//vpi_free_object(callback_handle);
 }
 
 
@@ -82,7 +83,7 @@ static void register_value_change_cb(PLI_INT32 (*cb_rtn)(struct t_cb_data *), vp
 	callback_handle = vpi_register_cb(&cb);
 	if (!callback_handle)
 		vpi_printf ("\e[31mERROR: Cannot register cbValueChange call back\e[0m\n");
-	vpi_free_object(callback_handle);
+	//vpi_free_object(callback_handle);
 }
 
 
@@ -230,6 +231,58 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 		vpi_free_object(iter);
 
 	vpi_free_object(top);
+}
+
+
+static void gather_all_nets(ModuleInstance& mod, vpiHandle modhandle)
+{
+	vpiHandle iter, net, inst;
+
+	if (!modhandle) {
+		iter = vpi_iterate(vpiModule, NULL);
+		modhandle = vpi_scan(iter);
+		vpi_free_object(iter);
+	}
+
+	mod.name = std::string(vpi_get_str(vpiName, modhandle));
+
+	iter = vpi_iterate(vpiNet, modhandle);
+	if (iter) {
+		while ((net = vpi_scan(iter))) {
+			ModuleNet mnet;
+			mnet.name = std::string(vpi_get_str(vpiName, net));
+			mnet.width = vpi_get(vpiSize, net);
+			mnet.handle = net;
+			switch (vpi_get(vpiDirection, net)) {
+				case vpiInput:
+					mnet.direction = 1;
+					break;
+				case vpiOutput:
+					mnet.direction = 2;
+					break;
+				case vpiInout:
+					mnet.direction = 3;
+					break;
+				default:
+					mnet.direction = 0;
+			}
+			mod.nets.push_back(mnet);
+		}
+	}
+	else
+		vpi_free_object(iter);
+
+	iter = vpi_iterate(vpiModule, modhandle);
+	if (iter) {
+		while ((inst = vpi_scan(iter))) {
+			mod.modules.push_back(ModuleInstance());
+			gather_all_nets(mod.modules[mod.modules.size() - 1], inst);
+		}
+	}
+	else
+		vpi_free_object(iter);
+
+	vpi_free_object(modhandle);
 }
 
 
@@ -585,6 +638,9 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 
 	vboard->set_time_resolution(vpi_get(vpiTimePrecision, NULL));
 
+	gather_all_nets(vboard->top_module, NULL);
+	vboard->top_module.print();
+
 	vboard->start_gui_thread();
 
 	register_cb_after(reset_startup_callback, 5e-9, vboard);
@@ -625,7 +681,7 @@ static void entry_point_cb()
 		vpi_printf("\e[31mERROR: Cannot register cbStartOfSimulation call back\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	vpi_free_object(callback_handle);
+	//vpi_free_object(callback_handle);
 
 	/* Register end of simulation callback */
 	cb.reason = cbEndOfSimulation;
@@ -637,7 +693,7 @@ static void entry_point_cb()
 		vpi_printf("\e[31mERROR: Cannot register cbEndOfSimulation call back\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	vpi_free_object(callback_handle);
+	//vpi_free_object(callback_handle);
 }
 
 

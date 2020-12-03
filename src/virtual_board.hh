@@ -28,6 +28,7 @@
 #include <time.h>
 #include "board_window.hh"
 #include "VBMessage.hh"
+#include "Instance.hh"
 
 
 class VirtualBoard {
@@ -49,6 +50,7 @@ public:
 	std::string  design_top_unit_name;
 	std::string  simulator_name;
 	std::string  simulator_version;
+	ModuleInstance top_module;
 	vpiHandle    clk_net;
 	vpiHandle    rstn_net;
 	vpiHandle    switches_net;
