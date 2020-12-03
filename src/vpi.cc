@@ -108,6 +108,8 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 	top = vpi_scan(iter);
 	vpi_free_object(iter);
 
+	vboard.design_top_unit_name = std::string(vpi_get_str(vpiName, top));
+
 	iter = vpi_iterate(vpiNet, top);
 	if (iter) {
 		while ((net = vpi_scan(iter))) {
@@ -323,56 +325,62 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 	bool advance_time = false;
 	bool exit_sim = false;
+	bool wait_other_messages = true;
 
-	VBMessage msg = vboard->receive_message_to_vpi();
-	switch (msg.type()) {
-		case VBMessage::MSG_CLOCK:
-			advance_time = true;
-			break;
-		case VBMessage::MSG_IO_CHANGED:
-			switch (msg.io_name()) {
-				case VBMessage::SWITCHES:
-					put_integer_value_to_net(vboard->switches_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_RSTN:
-					put_integer_value_to_net(vboard->rstn_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_CENTER:
-					put_integer_value_to_net(vboard->button_c_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_UP:
-					put_integer_value_to_net(vboard->button_u_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_DOWN:
-					put_integer_value_to_net(vboard->button_d_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_RIGHT:
-					put_integer_value_to_net(vboard->button_r_net, msg.value());
-					break;
-				case VBMessage::PUSH_BUTTON_LEFT:
-					put_integer_value_to_net(vboard->button_l_net, msg.value());
-					break;
-				default:
-					break;
-			}
-			break;
-		case VBMessage::MSG_NONE:
-			break;
-		case VBMessage::MSG_EXIT:
-			exit_sim = true;
-			break;
-		case VBMessage::MSG_RUN:
-			break;
-		case VBMessage::MSG_RUN_N:
-			break;
-		case VBMessage::MSG_STOP:
-			break;
-		case VBMessage::MSG_SET_FREQ:
-			break;
-		case VBMessage::MSG_UPDATE_SIGNALS:
-			break;
-		default:
-			printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
+	while (wait_other_messages) {
+		VBMessage msg = vboard->receive_message_to_vpi();
+		switch (msg.type()) {
+			case VBMessage::MSG_CLOCK:
+				wait_other_messages = false;
+				advance_time = true;
+				break;
+			case VBMessage::MSG_IO_CHANGED:
+				wait_other_messages = false;
+				switch (msg.io_name()) {
+					case VBMessage::SWITCHES:
+						put_integer_value_to_net(vboard->switches_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_RSTN:
+						put_integer_value_to_net(vboard->rstn_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_CENTER:
+						put_integer_value_to_net(vboard->button_c_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_UP:
+						put_integer_value_to_net(vboard->button_u_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_DOWN:
+						put_integer_value_to_net(vboard->button_d_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_RIGHT:
+						put_integer_value_to_net(vboard->button_r_net, msg.value());
+						break;
+					case VBMessage::PUSH_BUTTON_LEFT:
+						put_integer_value_to_net(vboard->button_l_net, msg.value());
+						break;
+					default:
+						wait_other_messages = true;
+				}
+				break;
+			case VBMessage::MSG_NONE:
+				break;
+			case VBMessage::MSG_EXIT:
+				wait_other_messages = false;
+				exit_sim = true;
+				break;
+			case VBMessage::MSG_RUN:
+				break;
+			case VBMessage::MSG_RUN_N:
+				break;
+			case VBMessage::MSG_STOP:
+				break;
+			case VBMessage::MSG_SET_FREQ:
+				break;
+			case VBMessage::MSG_UPDATE_SIGNALS:
+				break;
+			default:
+				printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
+		}
 	}
 	
 	if (!exit_sim) {
@@ -390,7 +398,7 @@ static PLI_INT32 set_clock_callback(p_cb_data cb_data)
 {
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 	put_integer_value_to_net(vboard->clk_net, 1);
-	register_cb_after(main_callback, vboard->half_period(), vboard);
+	register_cb_after(reset_clock_callback, vboard->half_period(), vboard);
 	return 0;
 }
 
@@ -461,7 +469,7 @@ static PLI_INT32 reset_startup_callback(p_cb_data cb_data)
 		case 2:
 			put_integer_value_to_net(vboard->clk_net, 0);
 			put_integer_value_to_net(vboard->rstn_net, 1);
-			register_cb_after(reset_clock_callback, 999980e-9 - vboard->half_period(), vboard);
+			register_cb_after(reset_clock_callback, vboard->half_period() - 20e-9, vboard);
 			break;
 
 		default:
@@ -479,6 +487,11 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 
 	vpi_printf("Start of simulation\n");
+
+	s_vpi_vlog_info info;
+	vpi_get_vlog_info(&info);
+	vboard->simulator_name = std::string(info.product);
+	vboard->simulator_version = std::string(info.version);
 
 	gather_toplevel_IO_nets(*vboard);
 
@@ -539,8 +552,11 @@ static PLI_INT32 end_of_sim_cb(p_cb_data cb_data)
 
 	vpi_printf("End of simulation\n");
 
-	if (vboard)
+
+	if (vboard) {
+		vboard->send_message_to_gui(VBMessage::exit());
 		delete vboard;
+	}
 
 	return 0;
 }

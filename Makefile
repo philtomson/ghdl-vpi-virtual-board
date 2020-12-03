@@ -15,8 +15,9 @@ OBJS     = $(addprefix $(BUILD)/, $(notdir $(SRC:.cc=.o)))
 OBJS    += $(BUILD)/resources.o
 CFLAGS  += -W -Wall -Wno-write-strings -O2 -Isrc `pkg-config --cflags gtkmm-3.0`
 LDFLAGS += `pkg-config --libs gtkmm-3.0` -lm -lrt
-#GHDL     = /home/opt/ghdl_gcc/bin/ghdl
-GHDL     = ghdl
+GHDL     = /home/opt/ghdl_gcc/bin/ghdl
+#GHDL     = ghdl
+#GHDL     = /opt/ghdl-0.37/bin/ghdl
 CXX      = g++
 GHDLCXX  = $(GHDL) --vpi-compile $(CXX)
 GHDLLD   = $(GHDL) --vpi-link $(CXX)
@@ -41,11 +42,13 @@ $(BUILD)/$(TARGET): $(OBJS)
 exec: $(BUILD)/$(TARGET)
 	$(GHDL) -a app.vhdl
 	$(GHDL) -e test
-	$(GHDL) -r test --vpi=./$(BUILD)/$(TARGET)
+	$(GHDL) -r test --vpi-trace=trace.txt --vpi=./$(BUILD)/$(TARGET)
 
 clean:
 	@rm -rvf $(BUILD)
 	@rm -vf work-*.cf
 	@rm -vf *.o
 	@rm -vf test
+	@rm -vf *.vcd
+	@rm -vf trace.txt
 

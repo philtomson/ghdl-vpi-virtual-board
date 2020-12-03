@@ -52,6 +52,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_virtual_board(virtual_board),
 	m_dispatcher(),
 	m_state_running(false),
+	m_closing(false),
 	m_ledsval(0),
 	m_switchesval(0),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
@@ -63,6 +64,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_boxSwitches(),
 	m_boxLeds(),
 	m_boxDisplaysAndButtons(),
+	m_box_names(),
 	m_boxDisplaysAndLabel(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_boxDisplays(),
 	m_boxDisplaysLeft(),
@@ -84,6 +86,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_freq_spinbutton(),
 	m_dumpreg_button(),
 	m_separator_4(),
+	m_board_name(),
 	m_design_name(),
 	m_logo_ensta(Gdk::Pixbuf::create_from_resource("/images/logo_ENSTA.png")),
 	m_boxlogo(),
@@ -93,7 +96,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 {
 	int i;
 
-	set_title("Virtual Board Simulator");
+	set_title(std::string("Virtual Board [") + m_virtual_board->design_top_unit_name + std::string("]"));
 
 	//set_icon_name("cpu-symbolic");
 	set_icon_name("cpu-frequency-indicator");
@@ -210,11 +213,23 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 
 	m_boxDisplaysRight.set_margin_left(20);
 
-	m_design_name.set_label("VPI Virtual Board Simulator");
+	m_board_name.set_label(
+			std::string("VPI Virtual Board on ") +
+			std::string(m_virtual_board->simulator_name) +
+			std::string(" ") +
+			std::string(m_virtual_board->simulator_version));
+	m_board_name.override_color(Gdk::RGBA("white"));
+	//m_board_name.set_justify(Gtk::JUSTIFY_CENTER);
+	m_board_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+	m_box_names.pack_start(m_board_name, Gtk::PACK_EXPAND_WIDGET, 0);
+
+	m_design_name.set_label(std::string("Top: [") + m_virtual_board->design_top_unit_name + std::string("]"));
 	m_design_name.override_color(Gdk::RGBA("white"));
-	//m_design_name.set_justify(Gtk::JUSTIFY_CENTER);
-	m_design_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-	m_boxDisplaysAndLabel.pack_start(m_design_name, Gtk::PACK_SHRINK, 7);
+	//m_design_name.set_justify(Gtk::JUSTIFY_RIGHT);
+	m_design_name.set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	m_box_names.pack_end(m_design_name, Gtk::PACK_EXPAND_WIDGET, 0);
+
+	m_boxDisplaysAndLabel.pack_start(m_box_names, Gtk::PACK_SHRINK, 7);
 
 	m_boxDisplays.pack_start(m_boxDisplaysLeft,  Gtk::PACK_SHRINK, 0);
 	m_boxDisplays.pack_start(m_boxDisplaysRight, Gtk::PACK_SHRINK, 0);
@@ -317,6 +332,7 @@ void VBWindow::on_run_button_clicked()
 void VBWindow::on_step_button_clicked()
 {
 	printf("Step\n");
+	m_virtual_board->send_message_to_vpi(VBMessage::clock());
 }
 
 
@@ -329,6 +345,16 @@ void VBWindow::on_freq_value_changed()
 void VBWindow::on_dump_button_clicked()
 {
 	printf("Pouet\n");
+	m_virtual_board->send_message_to_vpi(VBMessage::exit());
+}
+
+
+bool VBWindow::on_delete_event(GdkEventAny* any_event)
+{
+	(void)any_event;
+	m_closing = true;
+	m_virtual_board->send_message_to_vpi(VBMessage::exit());
+	return false;
 }
 
 
@@ -403,8 +429,9 @@ void VBWindow::on_notification_from_vpi()
 				go_on = false;
 				break;
 			case VBMessage::MSG_EXIT:
-				//printf("MSG_EXIT\n");
-				/* TODO */
+				go_on = false;
+				if (!m_closing)
+					get_application()->quit();
 				break;
 			case VBMessage::MSG_IO_CHANGED:
 				//printf("\e[32mMSG_IO_CHANGED\e[0m\n");

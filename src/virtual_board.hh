@@ -23,6 +23,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <string>
 #include <cstdint>
 #include "board_window.hh"
 #include "VBMessage.hh"
@@ -41,6 +42,9 @@ private:
 	double       m_period;
 
 public:
+	std::string  design_top_unit_name;
+	std::string  simulator_name;
+	std::string  simulator_version;
 	vpiHandle    clk_net;
 	vpiHandle    rstn_net;
 	vpiHandle    switches_net;

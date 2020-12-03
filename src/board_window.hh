@@ -48,6 +48,7 @@ protected:
 	VirtualBoard              *m_virtual_board;
 	Glib::Dispatcher           m_dispatcher;
 	bool                       m_state_running;
+	bool                       m_closing;
 	unsigned int               m_ledsval;
 	unsigned int               m_switchesval;
 	Gtk::Box                   m_boxMain;
@@ -59,6 +60,7 @@ protected:
 	Gtk::Box                   m_boxSwitches;
 	Gtk::Box                   m_boxLeds;
 	Gtk::Box                   m_boxDisplaysAndButtons;
+	Gtk::Box                   m_box_names;
 	Gtk::Box                   m_boxDisplaysAndLabel;
 	Gtk::Box                   m_boxDisplays;
 	Gtk::Box                   m_boxDisplaysLeft;
@@ -80,6 +82,7 @@ protected:
 	Gtk::SpinButton            m_freq_spinbutton;
 	Gtk::ToolButton            m_dumpreg_button;  
 	Gtk::SeparatorToolItem     m_separator_4;
+	Gtk::Label                 m_board_name;
 	Gtk::Label                 m_design_name;
 	Gtk::Image                 m_logo_ensta;
 	Gtk::Box                   m_boxlogo;
@@ -115,6 +118,7 @@ protected:
 	void on_step_button_clicked();
 	void on_freq_value_changed();
 	void on_dump_button_clicked();
+	bool on_delete_event(GdkEventAny* any_event);
 
 	void on_notification_from_vpi();
 };
