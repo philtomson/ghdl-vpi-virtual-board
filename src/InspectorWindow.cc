@@ -7,9 +7,10 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_virtual_board(vb),
 	m_headerbar()
 {
-	set_titlebar(m_headerbar);
 	set_icon_name("gtk-find");
-	set_title("Signal inspector");
+	m_headerbar.set_title("Signal inspector");
+	m_headerbar.set_show_close_button();
+	set_titlebar(m_headerbar);
 	signal_delete_event().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_delete_event));
 }
 

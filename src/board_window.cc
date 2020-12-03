@@ -349,6 +349,7 @@ void VBWindow::on_freq_value_changed()
 void VBWindow::on_dump_button_clicked()
 {
 	m_virtual_board->send_message_to_vpi(VBMessage::update_signals());
+	m_inspector_window.show_all();
 	m_inspector_window.present();
 }
 
