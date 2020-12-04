@@ -5,7 +5,8 @@ ModuleNet::ModuleNet() :
 	name(),
 	width(0),
 	direction(0),
-	handle(nullptr)
+	handle(nullptr),
+	value("Pouet")
 {
 }
 

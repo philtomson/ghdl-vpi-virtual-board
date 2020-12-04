@@ -40,13 +40,13 @@ protected:
 			add(m_col_name);
 			add(m_col_width);
 			add(m_col_type);
-			add(m_col_value);
+			add(m_col_net);
 		}
 
-		Gtk::TreeModelColumn<std::string> m_col_name;
-		Gtk::TreeModelColumn<int> m_col_width;
-		Gtk::TreeModelColumn<std::string> m_col_type;
-		Gtk::TreeModelColumn<std::string> m_col_value;
+		Gtk::TreeModelColumn<std::string>      m_col_name;
+		Gtk::TreeModelColumn<int>              m_col_width;
+		Gtk::TreeModelColumn<std::string>      m_col_type;
+		Gtk::TreeModelColumn<const ModuleNet*> m_col_net;
 	};
 
 	/* Tree model columns for modules */
@@ -55,10 +55,12 @@ protected:
 		ModuleModelColumns() {
 			add(m_col_name);
 			add(m_col_net_model);
+			add(m_col_module_instance);
 		}
 
-		Gtk::TreeModelColumn<std::string> m_col_name;
+		Gtk::TreeModelColumn<std::string>                  m_col_name;
 		Gtk::TreeModelColumn<Glib::RefPtr<Gtk::ListStore>> m_col_net_model;
+		Gtk::TreeModelColumn<const ModuleInstance*>        m_col_module_instance;
 	};
 
 private:
@@ -72,6 +74,8 @@ private:
 
 	NetModelColumns              m_net_model_column;
 	Gtk::TreeView                m_net_treeview;
+	Gtk::CellRendererText        m_net_value_renderer;
+	Gtk::TreeView::Column        m_net_value_treeviewcolumn;
 
 	ModuleModelColumns           m_module_model_column;
 	Gtk::TreeView                m_module_treeview;
@@ -84,6 +88,8 @@ private:
 	bool on_my_delete_event(GdkEventAny* any_event);
 	void on_module_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 	void build_module_hierarchy_model(Gtk::TreeModel::Row& row, const ModuleInstance& inst);
+
+	void treeviewcolumn_net_value_on_cell_data(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator& iter);
 };
 
 

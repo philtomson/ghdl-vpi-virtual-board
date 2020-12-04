@@ -1,6 +1,6 @@
 #include "InspectorWindow.hh"
 #include "virtual_board.hh"
-//#include <iostream>
+#include <iostream>
 
 
 InspectorWindow::InspectorWindow(VirtualBoard* vb) :
@@ -11,7 +11,9 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 //	m_frame_modules(),
 //	m_frame_nets(),
 	m_scrollwindow_modules(),
-	m_scrollwindow_nets()
+	m_scrollwindow_nets(),
+	m_net_value_renderer(),
+	m_net_value_treeviewcolumn()
 {
 	set_icon_name("gtk-find");
 	m_headerbar.set_title("Signal inspector");
@@ -78,15 +80,46 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 
 	/* NETs */
 
+
 	/* Add the TreeView's view columns */
 	m_net_treeview.append_column("Nets",  m_net_model_column.m_col_name);
-	m_net_treeview.append_column("Width", m_net_model_column.m_col_width);
+	m_net_treeview.append_column("W",     m_net_model_column.m_col_width);
 	m_net_treeview.append_column("IO",    m_net_model_column.m_col_type);
-	m_net_treeview.append_column("Value", m_net_model_column.m_col_value);
+	m_net_value_treeviewcolumn.set_title("Value");
+	m_net_value_treeviewcolumn.pack_start(m_net_value_renderer);
+	m_net_treeview.append_column(m_net_value_treeviewcolumn);
+
+	/*******************************************************/
+	//Tell the view column how to render the model values:
+	m_net_value_treeviewcolumn.set_cell_data_func(m_net_value_renderer,
+			sigc::mem_fun(*this, &InspectorWindow::treeviewcolumn_net_value_on_cell_data));
+
+//	//Make the CellRenderer editable, and handle its editing signals:
+//	m_net_value_renderer.property_editable() = true;
+//
+//	m_net_value_renderer.signal_editing_started().connect(
+//			sigc::mem_fun(*this,
+//				&InspectorWindow::cellrenderer_net_value_on_editing_started) );
+//
+//	m_net_value_renderer.signal_edited().connect(sigc::mem_fun(*this,
+//				&InspectorWindow::cellrenderer_net_value_on_edited));
+	/*******************************************************/
+	m_net_treeview.get_column(1)->set_alignment(Gtk::ALIGN_CENTER);
+	m_net_treeview.get_column(2)->set_alignment(Gtk::ALIGN_CENTER);
+	m_net_treeview.get_column(1)->set_min_width(25);
+	m_net_treeview.get_column(1)->set_max_width(40);
+	//m_net_treeview.get_column(1)->get_first_cell()->set_alignment(1.0f, 0.5f);
+	m_net_treeview.get_column_cell_renderer(1)->set_alignment(1.0f, 0.5f);
+	m_net_treeview.get_column(2)->set_max_width(25);
+	m_net_treeview.get_column(2)->set_min_width(25);
+	//m_net_treeview.get_column(2)->get_first_cell()->set_alignment(0.5f, 0.5f);
+	m_net_treeview.get_column_cell_renderer(2)->set_alignment(0.5f, 0.5f);
+
 	m_module_treeview.set_reorderable();
 	m_net_treeview.set_rules_hint();
-	m_net_treeview.set_rubber_banding();
+	//m_net_treeview.set_rubber_banding();
 	//m_net_treeview.set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_BOTH); //TREE_VIEW_GRID_LINES_HORIZONTAL
+	m_net_treeview.set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_VERTICAL); //TREE_VIEW_GRID_LINES_HORIZONTAL
 
 	//m_net_treeview.append_column_numeric("Formatted number", m_net_model_column.m_col_number,
 	//		"%010d" /* 10 digits, using leading zeroes. */);
@@ -98,6 +131,8 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	for (guint i = 0; i < 4; i++) {
 		m_net_treeview.get_column(i)->set_reorderable();
 		m_net_treeview.get_column(i)->set_resizable();
+		//m_net_treeview.get_column(i)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+		m_net_treeview.get_column(i)->set_expand(false);
 	}
 
 	//m_net_treeview.columns_autosize();
@@ -138,12 +173,11 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 	int i, s;
 	Glib::RefPtr<Gtk::ListStore> net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
 
-	s = inst.nets.size();
-	for (i = 0; i < s; i++) {
+	for (std::vector<ModuleNet>::const_iterator it = inst.nets.cbegin(); it != inst.nets.cend(); ++it) {
 		Gtk::TreeModel::Row net_row = *(net_ref_tree_model->append());
-		net_row[m_net_model_column.m_col_name] = inst.nets[i].name;
-		net_row[m_net_model_column.m_col_width] = inst.nets[i].width;
-		switch (inst.nets[i].direction) {
+		net_row[m_net_model_column.m_col_name] = it->name;
+		net_row[m_net_model_column.m_col_width] = it->width;
+		switch (it->direction) {
 			case 1:
 				net_row[m_net_model_column.m_col_type] = "i";
 				break;
@@ -156,11 +190,13 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 			default:
 				net_row[m_net_model_column.m_col_type] = "";
 		}
-		net_row[m_net_model_column.m_col_value] = std::string((size_t)inst.nets[i].width, 'U');
+		net_row[m_net_model_column.m_col_net] = &(*it);
 	}
 
-	module_row[m_module_model_column.m_col_name] = inst.name;
 	module_row[m_module_model_column.m_col_net_model] = net_ref_tree_model;
+
+	module_row[m_module_model_column.m_col_name] = inst.name;
+	module_row[m_module_model_column.m_col_module_instance] = &inst;
 
 	s = inst.modules.size();
 	for (i = 0; i < s; i++) {
@@ -169,4 +205,88 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 	}
 }
 
+
+void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
+		Gtk::CellRenderer *renderer,
+		const Gtk::TreeModel::iterator& iter)
+{
+	(void)renderer;
+	//Get the value from the model and show it appropriately in the view:
+	if(iter) {
+		Gtk::TreeModel::Row row = *iter;
+		const ModuleNet *modnet = row[m_net_model_column.m_col_net];
+		m_net_value_renderer.property_text() = modnet->value;
+		//m_net_value_renderer.property_text() = std::string("Coucou les amis");
+	}
+}
+
+
+// void InspectorWindow::cellrenderer_net_value_on_editing_started(
+//         Gtk::CellEditable* cell_editable, const Glib::ustring& path)
+// {
+//   //Start editing with previously-entered (but invalid) text,
+//   //if we are allowing the user to correct some invalid data.
+//   if(m_validate_retry)
+//   {
+//     //This is the CellEditable inside the CellRenderer.
+//     auto celleditable_validated = cell_editable;
+// 
+//     //It's usually an Entry, at least for a CellRendererText:
+//     auto pEntry = dynamic_cast<Gtk::Entry*>(celleditable_validated);
+//     if(pEntry)
+//     {
+//       pEntry->set_text(m_invalid_text_for_retry);
+//       m_validate_retry = false;
+//       m_invalid_text_for_retry.clear();
+//     }
+//   }
+// 
+// }
+// 
+// 
+// void InspectorWindow::cellrenderer_net_value_on_edited(
+//         const Glib::ustring& path_string,
+//         const Glib::ustring& new_text)
+// {
+//   Gtk::TreePath path(path_string);
+// 
+//   //Convert the inputed text to an integer, as needed by our model column:
+//   char* pchEnd = nullptr;
+//   int new_value = strtol(new_text.c_str(), &pchEnd, 10);
+// 
+//   if(new_value > 10)
+//   {
+//     //Prevent entry of numbers higher than 10.
+// 
+//     //Tell the user:
+//     Gtk::MessageDialog dialog(*this,
+//             "The number must be less than 10. Please try again.",
+//             false, Gtk::MESSAGE_ERROR);
+//     dialog.run();
+// 
+//     //Start editing again, with the bad text, so that the user can correct it.
+//     //A real application should probably allow the user to revert to the
+//     //previous text.
+// 
+//     //Set the text to be used in the start_editing signal handler:
+//     m_invalid_text_for_retry = new_text;
+//     m_validate_retry = true;
+// 
+//     //Start editing again:
+//     m_TreeView.set_cursor(path, m_treeviewcolumn_validated,
+//             m_cellrenderer_validated, true /* start_editing */);
+//   }
+//   else
+//   {
+//     //Get the row from the path:
+//     Gtk::TreeModel::iterator iter = m_refTreeModel->get_iter(path);
+//     if(iter)
+//     {
+//       Gtk::TreeModel::Row row = *iter;
+// 
+//       //Put the new value in the model:
+//       row[m_Columns.m_col_number_validated] = new_value;
+//     }
+//   }
+// }
 

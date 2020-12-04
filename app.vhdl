@@ -222,6 +222,87 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 
+entity rising_edge_detect is
+	port ( clk    : in  std_logic;
+	       input  : in  std_logic;
+	       strobe : out std_logic);
+end entity;
+
+
+architecture rtl of rising_edge_detect is
+	signal r : std_logic;
+begin
+	process (clk) is
+	begin
+		if rising_edge(clk) then
+			r <= input;
+		end if;
+	end process;
+	strobe <= input and not(r);
+end architecture;
+
+
+--------------------------------------------------------------------------------
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+
+entity button_events is
+	port ( clk      : in  std_logic;
+		   button_l : in  std_logic;
+		   button_r : in  std_logic;
+		   button_c : in  std_logic;
+		   button_u : in  std_logic;
+		   button_d : in  std_logic;
+	       bel      : out std_logic;
+	       ber      : out std_logic;
+	       bec      : out std_logic;
+	       beu      : out std_logic;
+	       bed      : out std_logic);
+end entity;
+
+
+architecture rtl of button_events is
+begin
+	rising_edge_l: entity work.rising_edge_detect
+	port map ( clk    => clk,
+	           input  => button_l,
+			   strobe => bel);
+
+	rising_edge_r: entity work.rising_edge_detect
+	port map ( clk    => clk,
+	           input  => button_r,
+			   strobe => ber);
+
+	rising_edge_c: entity work.rising_edge_detect
+	port map ( clk    => clk,
+	           input  => button_c,
+			   strobe => bec);
+
+	rising_edge_u: entity work.rising_edge_detect
+	port map ( clk    => clk,
+	           input  => button_u,
+			   strobe => beu);
+
+	rising_edge_d: entity work.rising_edge_detect
+	port map ( clk    => clk,
+	           input  => button_d,
+			   strobe => bed);
+
+end architecture;
+
+
+--------------------------------------------------------------------------------
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+
 entity test is
 	generic ( cnt_max : natural := 500 );
 	port ( clk            : in  std_logic;
@@ -273,17 +354,28 @@ begin
 
 	cntv <= std_logic_vector(to_unsigned(cnt, 14));
 
+	button_detects: entity work.button_events
+	port map ( clk      => clk,
+		       button_l => button_l,
+		       button_r => button_r,
+		       button_c => button_c,
+		       button_u => button_u,
+		       button_d => button_d,
+	           bel      => l,
+	           ber      => r,
+	           bec      => c,
+	           beu      => u,
+	           bed      => d);
+
 	-- led shift register
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			l <= button_l;
-			r <= button_r;
 			if rstn = '0' then
 				sr <= "100000000000000";
-			elsif button_l = '1' and l = '0' then
+			elsif l = '1' then
 				sr <= sr(13 downto 0) & sr(14);
-			elsif button_r = '1' and r = '0' then
+			elsif r = '1' then
 				sr <= sr(0) & sr(14 downto 1);
 			end if;
 		end if;
@@ -293,10 +385,9 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			c <= button_c;
 			if rstn = '0' then
 				display_cnt <= '0';
-			elsif button_c = '1' and c = '0' then
+			elsif c = '1' then
 				display_cnt <= not(display_cnt);
 			end if;
 		end if;
@@ -346,19 +437,17 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			u <= button_u;
-			d <= button_d;
 			if rstn = '0' then
 				cnt <= 42;
 				dv <= '1';
-			elsif button_u = '1' and u = '0' then
+			elsif u = '1' then
 				if cnt >= 9999 then
 					cnt <= 0;
 				else
 					cnt <= cnt + 1;
 				end if;
 				dv <= '1';
-			elsif button_d = '1' and d = '0' then
+			elsif d = '1' then
 				if cnt = 0 then
 					cnt <= 9999;
 				else
