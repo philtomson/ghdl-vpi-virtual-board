@@ -639,7 +639,7 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	vboard->set_time_resolution(vpi_get(vpiTimePrecision, NULL));
 
 	gather_all_nets(vboard->top_module, NULL);
-	vboard->top_module.print();
+	//vboard->top_module.print();
 
 	vboard->start_gui_thread();
 
