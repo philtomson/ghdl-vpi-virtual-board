@@ -338,7 +338,7 @@ void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
 		const ModuleNet *modnet = row[m_net_model_column.m_col_net];
 		switch (row[m_net_model_column.m_col_format]) {
 			case 1:
-				m_net_value_renderer.property_text() = "Decimal";
+				m_net_value_renderer.property_text() = binary_to_decimal(modnet->value);
 				break;
 			case 2:
 				m_net_value_renderer.property_text() = "Hexa";
@@ -348,6 +348,27 @@ void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
 		}
 		//m_net_value_renderer.property_text() = std::string("Coucou les amis");
 	}
+}
+
+
+/* FIXME convert to decimal strings greater than 64 bits */
+std::string InspectorWindow::binary_to_decimal(const std::string& binary)
+{
+	bool valid = true;
+	unsigned long val = 0;
+	for (std::string::const_iterator it = binary.cbegin(); it != binary.cend(); ++it) {
+		val <<= 1;
+		if (*it == '1')
+			val |= 1;
+		else if (*it != '0') {
+			valid = false;
+			break;
+		}
+	}
+	if (!valid)
+		return std::string("invalid");
+
+	return std::to_string(val);
 }
 
 

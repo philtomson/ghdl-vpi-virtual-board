@@ -130,6 +130,8 @@ private:
 	void on_my_show();
 	void on_my_hide();
 	bool on_my_timeout();
+
+	std::string binary_to_decimal(const std::string& binary);
 };
 
 

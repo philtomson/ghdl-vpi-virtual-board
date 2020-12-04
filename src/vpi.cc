@@ -119,8 +119,10 @@ static inline void update_net_value_string(ModuleNet *mn)
 	s_vpi_value val;
 	val.format = vpiBinStrVal;
 	vpi_get_value(mn->handle, &val);
-	if (!val.value.str)
-		mn->value = std::string("please use GHDL > v0.37");
+	if (!val.value.str) {
+		if (mn->value.empty())
+			mn->value = std::string("please use GHDL > v0.37");
+	}
 	else {
 		if (strcmp(val.value.str, mn->value.c_str()) == 0)
 			mn->value_changed = false;
