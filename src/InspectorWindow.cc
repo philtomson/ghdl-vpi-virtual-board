@@ -13,12 +13,16 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_scrollwindow_modules(),
 	m_scrollwindow_nets(),
 	m_net_value_renderer(),
-	m_net_value_treeviewcolumn()
+	m_net_value_treeviewcolumn(),
+	m_curren_module(nullptr),
+	m_timeout_connection()
 {
 	set_icon_name("gtk-find");
 	m_headerbar.set_title("Signal inspector");
 	m_headerbar.set_show_close_button();
 	set_titlebar(m_headerbar);
+	signal_show().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_show));
+	signal_hide().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_hide));
 	signal_delete_event().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_delete_event));
 	set_size_request(640, 480);
 	//set_border_width(5);
@@ -131,7 +135,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//m_net_treeview.check_resize();
 	
 	m_net_treeview.set_activate_on_single_click();
-	m_net_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_net_treeview_row_activated));
+//	m_net_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_net_treeview_row_activated));
 
 	Gtk::TreeModel::iterator iter = m_module_ref_tree_model->get_iter("0");
 	if (iter) {
@@ -139,6 +143,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 		Glib::RefPtr<Gtk::ListStore> top_module_net_list = row[m_module_model_column.m_col_net_model];
 		m_net_treeview.set_model(top_module_net_list);
 	}
+	m_curren_module = &m_virtual_board->top_module;
 }
 
 
@@ -158,21 +163,32 @@ void InspectorWindow::on_module_treeview_row_activated(const Gtk::TreeModel::Pat
 		Gtk::TreeModel::Row row = *iter;
 		//std::cout << "Row activated: " << std::string(row[m_module_model_column.m_col_name]) << std::endl;
 		Glib::RefPtr<Gtk::ListStore> net_list_model = row[m_module_model_column.m_col_net_model];
-		m_virtual_board->send_message_to_vpi(VBMessage::read_module_nets((ModuleInstance*)row[m_module_model_column.m_col_module_instance]));
 		m_net_treeview.set_model(net_list_model);
+/* Keep ? */
+		//m_virtual_board->send_message_to_vpi(VBMessage::read_module_nets((ModuleInstance*)row[m_module_model_column.m_col_module_instance]));
+
+		m_curren_module = (ModuleInstance*)row[m_module_model_column.m_col_module_instance];
 	}
 }
 
 
-void InspectorWindow::on_net_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+/* Keep ? */
+// void InspectorWindow::on_net_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+// {
+// 	(void)column;
+// 	Gtk::TreeModel::iterator iter = column->get_tree_view()->get_model()->get_iter(path);
+// 	if (iter) {
+// 		Gtk::TreeModel::Row row = *iter;
+// 		std::cout << "Row activated: " << std::string(row[m_net_model_column.m_col_name]) << std::endl;
+// 		m_virtual_board->send_message_to_vpi(VBMessage::read_net((ModuleNet*)row[m_net_model_column.m_col_net]));
+// 	}
+// }
+
+
+void InspectorWindow::update_net_row(const ModuleNet& mn)
 {
-	(void)column;
-	Gtk::TreeModel::iterator iter = column->get_tree_view()->get_model()->get_iter(path);
-	if (iter) {
-		Gtk::TreeModel::Row row = *iter;
-		std::cout << "Row activated: " << std::string(row[m_net_model_column.m_col_name]) << std::endl;
-		m_virtual_board->send_message_to_vpi(VBMessage::read_net((ModuleNet*)row[m_net_model_column.m_col_net]));
-	}
+	Gtk::TreeModel::Row net_row = *(mn.row);
+	net_row[m_net_model_column.m_col_dumy] = net_row[m_net_model_column.m_col_dumy] xor true;
 }
 
 
@@ -182,7 +198,8 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 	Glib::RefPtr<Gtk::ListStore> net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
 
 	for (std::vector<ModuleNet>::iterator it = inst.nets.begin(); it != inst.nets.end(); ++it) {
-		Gtk::TreeModel::Row net_row = *(net_ref_tree_model->append());
+		it->row = net_ref_tree_model->append();
+		Gtk::TreeModel::Row net_row = *(it->row);
 		net_row[m_net_model_column.m_col_name] = it->name;
 		net_row[m_net_model_column.m_col_width] = it->width;
 		switch (it->direction) {
@@ -297,4 +314,26 @@ void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
 //     }
 //   }
 // }
+
+
+void InspectorWindow::on_my_show()
+{
+	//std::cout << "Show inspector" << std::endl;
+	m_timeout_connection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_timeout), 33);
+}
+
+void InspectorWindow::on_my_hide()
+{
+	//std::cout << "Hide inspector" << std::endl;
+	m_timeout_connection.disconnect();
+}
+
+
+bool InspectorWindow::on_my_timeout()
+{
+	//std::cout << "on_my_timeout()" << std::endl;
+	m_virtual_board->send_message_to_vpi(VBMessage::read_module_nets(m_curren_module));
+	return true;
+}
+
 

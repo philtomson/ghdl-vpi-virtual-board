@@ -6,7 +6,8 @@ ModuleNet::ModuleNet() :
 	width(0),
 	direction(0),
 	handle(nullptr),
-	value()
+	value(),
+	row()
 {
 }
 

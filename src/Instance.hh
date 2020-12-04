@@ -20,15 +20,18 @@
 #include <vector>
 #include <string>
 #include <vpi_user.h>
+#include <gtkmm/treeiter.h>
+//#include <gtkmm/treemodel.h>
 
 
 class ModuleNet {
 public:
-	std::string name;
-	int         width;
-	int         direction; // 0: none, 1: input, 2: output, 3: inout
-	vpiHandle   handle;
-	std::string value;
+	std::string          name;
+	int                  width;
+	int                  direction; // 0: none, 1: input, 2: output, 3: inout
+	vpiHandle            handle;
+	std::string          value;
+	Gtk::TreeIter        row;
 
 	ModuleNet();
 
