@@ -1,6 +1,101 @@
+/* Copyright (C) 2020 Théotime Bollengier <theotime.bollengier@ensta-bretagne.fr>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <gtkmm/treeselection.h>
 #include "InspectorWindow.hh"
 #include "virtual_board.hh"
 #include <iostream>
+
+
+SignalTreeView::SignalTreeView() :
+	Gtk::TreeView(),
+	m_binary_menuitem("Binary"),
+	m_hexa_menuitem("Hexa"),
+	m_decimal_menuitem("Decimal"),
+	m_menu(),
+	m_model_columns(nullptr)
+{
+	m_menu.append(m_binary_menuitem);
+	m_binary_menuitem.signal_activate().connect(sigc::mem_fun(*this, &SignalTreeView::on_binary_selected));
+	m_menu.append(m_hexa_menuitem);
+	m_hexa_menuitem.signal_activate().connect(sigc::mem_fun(*this, &SignalTreeView::on_hexa_selected));
+	m_menu.append(m_decimal_menuitem);
+	m_decimal_menuitem.signal_activate().connect(sigc::mem_fun(*this, &SignalTreeView::on_decimal_selected));
+	m_menu.show_all();
+}
+
+
+SignalTreeView::~SignalTreeView()
+{
+}
+
+
+void SignalTreeView::set_column_model(const NetModelColumns& model_columns)
+{
+	m_model_columns = &model_columns;
+}
+
+
+bool SignalTreeView::on_button_press_event(GdkEventButton *button_event)
+{
+	bool ret = false;
+
+	ret = TreeView::on_button_press_event(button_event);
+
+	if ((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3))
+		m_menu.popup_at_pointer((GdkEvent*)button_event);
+
+	return ret;
+}
+
+
+void SignalTreeView::on_binary_selected()
+{
+	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
+	if (ref_selection) {
+		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
+		if (iter) {
+			(*iter)[m_model_columns->m_col_format] = 0;
+		}
+	}
+}
+
+
+void SignalTreeView::on_hexa_selected()
+{
+	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
+	if (ref_selection) {
+		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
+		if (iter) {
+			(*iter)[m_model_columns->m_col_format] = 2;
+		}
+	}
+}
+
+
+void SignalTreeView::on_decimal_selected()
+{
+	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
+	if (ref_selection) {
+		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
+		if (iter) {
+			(*iter)[m_model_columns->m_col_format] = 1;
+		}
+	}
+}
 
 
 InspectorWindow::InspectorWindow(VirtualBoard* vb) :
@@ -78,6 +173,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 
 
 	/* NETs */
+	m_net_treeview.set_column_model(m_net_model_column);
 	/* Add the TreeView's view columns */
 	m_net_treeview.append_column("Nets",  m_net_model_column.m_col_name);
 	m_net_treeview.append_column("W",     m_net_model_column.m_col_width);
@@ -242,7 +338,16 @@ void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
 	if(iter) {
 		Gtk::TreeModel::Row row = *iter;
 		const ModuleNet *modnet = row[m_net_model_column.m_col_net];
-		m_net_value_renderer.property_text() = modnet->value;
+		switch (row[m_net_model_column.m_col_format]) {
+			case 1:
+				m_net_value_renderer.property_text() = "Decimal";
+				break;
+			case 2:
+				m_net_value_renderer.property_text() = "Hexa";
+				break;
+			default:
+				m_net_value_renderer.property_text() = modnet->value;
+		}
 		//m_net_value_renderer.property_text() = std::string("Coucou les amis");
 	}
 }

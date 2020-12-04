@@ -25,32 +25,61 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
 //#include <gtkmm/frame.h>
 #include "Instance.hh"
+
 
 class VirtualBoard;
 
 
-class InspectorWindow : public Gtk::Window {
+/* Tree model columns for nets */
+class NetModelColumns : public Gtk::TreeModel::ColumnRecord {
+public:
+	NetModelColumns() {
+		add(m_col_name);
+		add(m_col_width);
+		add(m_col_type);
+		add(m_col_net);
+		add(m_col_format);
+		add(m_col_dumy);
+	}
+
+	Gtk::TreeModelColumn<std::string> m_col_name;
+	Gtk::TreeModelColumn<int>         m_col_width;
+	Gtk::TreeModelColumn<std::string> m_col_type;
+	Gtk::TreeModelColumn<ModuleNet*>  m_col_net;
+	Gtk::TreeModelColumn<char>        m_col_format; // 0: bin, 1: decimal, 2: hexa
+	Gtk::TreeModelColumn<bool>        m_col_dumy;
+};
+
+class SignalTreeView : public Gtk::TreeView {
+private:
+	Gtk::MenuItem m_binary_menuitem;
+	Gtk::MenuItem m_hexa_menuitem;
+	Gtk::MenuItem m_decimal_menuitem;
+	Gtk::Menu     m_menu;
+	const NetModelColumns *m_model_columns;
+
 protected:
-	/* Tree model columns for nets */
-	class NetModelColumns : public Gtk::TreeModel::ColumnRecord {
-	public:
-		NetModelColumns() {
-			add(m_col_name);
-			add(m_col_width);
-			add(m_col_type);
-			add(m_col_net);
-			add(m_col_dumy);
-		}
+	bool on_button_press_event(GdkEventButton *button_event) override;
+	void on_binary_selected();
+	void on_hexa_selected();
+	void on_decimal_selected();
 
-		Gtk::TreeModelColumn<std::string> m_col_name;
-		Gtk::TreeModelColumn<int>         m_col_width;
-		Gtk::TreeModelColumn<std::string> m_col_type;
-		Gtk::TreeModelColumn<ModuleNet*>  m_col_net;
-		Gtk::TreeModelColumn<bool>        m_col_dumy;
-	};
+public:
+	SignalTreeView();
+	virtual ~SignalTreeView();
 
+	void set_column_model(const NetModelColumns& model_columns);
+};
+
+
+
+
+class InspectorWindow : public Gtk::Window {
+public:
 	/* Tree model columns for modules */
 	class ModuleModelColumns : public Gtk::TreeModel::ColumnRecord {
 	public:
@@ -75,7 +104,7 @@ private:
 	Gtk::ScrolledWindow m_scrollwindow_nets;
 
 	NetModelColumns              m_net_model_column;
-	Gtk::TreeView                m_net_treeview;
+	SignalTreeView               m_net_treeview;
 	Gtk::CellRendererText        m_net_value_renderer;
 	Gtk::TreeView::Column        m_net_value_treeviewcolumn;
 
