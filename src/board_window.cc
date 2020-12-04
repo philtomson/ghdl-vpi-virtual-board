@@ -482,6 +482,9 @@ void VBWindow::on_notification_from_vpi()
 						break;
 				}
 				break;
+			case VBMessage::MSG_MODULE_NETS_READ:
+				printf("Nets of module %s updated\n", msg.module_instance()->name.c_str());
+				break;
 			case VBMessage::MSG_NET_READ:
 				printf("Net %s: %s\n", msg.module_net()->name.c_str(), msg.module_net()->value.c_str());
 				break;

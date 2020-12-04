@@ -158,6 +158,7 @@ void InspectorWindow::on_module_treeview_row_activated(const Gtk::TreeModel::Pat
 		Gtk::TreeModel::Row row = *iter;
 		//std::cout << "Row activated: " << std::string(row[m_module_model_column.m_col_name]) << std::endl;
 		Glib::RefPtr<Gtk::ListStore> net_list_model = row[m_module_model_column.m_col_net_model];
+		m_virtual_board->send_message_to_vpi(VBMessage::read_module_nets((ModuleInstance*)row[m_module_model_column.m_col_module_instance]));
 		m_net_treeview.set_model(net_list_model);
 	}
 }

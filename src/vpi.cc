@@ -114,12 +114,22 @@ static int get_integer_value_from_net(vpiHandle net)
 }
 
 
-static void update_net_value_string(ModuleNet *mn)
+static inline void update_net_value_string(ModuleNet *mn)
 {
 	s_vpi_value val;
 	val.format = vpiBinStrVal;
 	vpi_get_value(mn->handle, &val);
-	mn->value = std::string(val.value.str);
+	if (!val.value.str)
+		mn->value = std::string("please use GHDL > v0.37");
+	else
+		mn->value = std::string(val.value.str);
+}
+
+
+static void update_module_net_value_strings(ModuleInstance *mi)
+{
+	for (std::vector<ModuleNet>::iterator it = mi->nets.begin(); it != mi->nets.end(); ++it)
+		update_net_value_string(&(*it));
 }
 
 
@@ -452,6 +462,10 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 			case VBMessage::MSG_READ_NET:
 				update_net_value_string(msg.module_net());
 				vboard->send_message_to_gui(VBMessage::net_read(msg.module_net()));
+				break;
+			case VBMessage::MSG_READ_MODULE_NETS:
+				update_module_net_value_strings(msg.module_instance());
+				vboard->send_message_to_gui(VBMessage::module_nets_read(msg.module_instance()));
 				break;
 			case VBMessage::MSG_NONE:
 				break;
