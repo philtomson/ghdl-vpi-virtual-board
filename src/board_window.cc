@@ -485,7 +485,8 @@ void VBWindow::on_notification_from_vpi()
 			case VBMessage::MSG_MODULE_NETS_READ:
 				//printf("Nets of module %s updated\n", msg.module_instance()->name.c_str());
 				for (std::vector<ModuleNet>::iterator it = msg.module_instance()->nets.begin(); it != msg.module_instance()->nets.end(); ++it) {
-					m_inspector_window.update_net_row(*it);
+					if (it->value_changed)
+						m_inspector_window.update_net_row(*it);
 				}
 				break;
 			case VBMessage::MSG_NET_READ:

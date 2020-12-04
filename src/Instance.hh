@@ -32,6 +32,7 @@ public:
 	vpiHandle            handle;
 	std::string          value;
 	Gtk::TreeIter        row;
+	bool                 value_changed;
 
 	ModuleNet();
 

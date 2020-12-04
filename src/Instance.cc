@@ -7,7 +7,8 @@ ModuleNet::ModuleNet() :
 	direction(0),
 	handle(nullptr),
 	value(),
-	row()
+	row(),
+	value_changed(false)
 {
 }
 
