@@ -393,7 +393,7 @@ begin
 		end if;
 	end process;
 	leds(14 downto 0) <= ('0' & cntv) when display_cnt = '1' else sr;
-	--leds(14 downto 0) <= "100110000001111";
+	--leds(14 downto 0) <= "100110-HLWZ10XU";
 	leds(15) <= blink;
 
 	-- blink counter

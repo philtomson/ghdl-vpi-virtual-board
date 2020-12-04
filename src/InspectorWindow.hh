@@ -132,6 +132,7 @@ private:
 	bool on_my_timeout();
 
 	std::string binary_to_decimal(const std::string& binary);
+	std::string binary_to_hexa(const std::string& binary);
 };
 
 

@@ -341,7 +341,7 @@ void InspectorWindow::treeviewcolumn_net_value_on_cell_data(
 				m_net_value_renderer.property_text() = binary_to_decimal(modnet->value);
 				break;
 			case 2:
-				m_net_value_renderer.property_text() = "Hexa";
+				m_net_value_renderer.property_text() = binary_to_hexa(modnet->value);
 				break;
 			default:
 				m_net_value_renderer.property_text() = modnet->value;
@@ -358,17 +358,48 @@ std::string InspectorWindow::binary_to_decimal(const std::string& binary)
 	unsigned long val = 0;
 	for (std::string::const_iterator it = binary.cbegin(); it != binary.cend(); ++it) {
 		val <<= 1;
-		if (*it == '1')
+		if (*it == '1' || *it == 'H')
 			val |= 1;
-		else if (*it != '0') {
+		else if (*it != '0' && *it != 'L') {
 			valid = false;
 			break;
 		}
 	}
 	if (!valid)
-		return std::string("invalid");
+		return std::string("Unknown");
 
 	return std::to_string(val);
+}
+
+
+std::string InspectorWindow::binary_to_hexa(const std::string& binary)
+{
+	bool valid;
+	int strs = (binary.size() - 1) / 4 + 1;
+	std::string res(strs, '0');
+	int i, j, k;
+	char c, v;
+	for (i = strs-1, j = binary.size() - 1; i >= 0; i--) {
+		valid = true;
+		v = 0;
+		for (k = 0; k < 4 && j >= 0; k++, j--) {
+			c = binary[j];
+			if (c == '1' || c == 'H')
+				v |= (1 << k);
+			else if (c != '0' && c != 'L')
+				valid = false;
+		}
+		if (v > 9)
+			v += ('a' - 10);
+		else
+			v += '0';
+		if (valid) 
+			res[i] = v;
+		else
+			res[i] = 'X';
+	}
+
+	return res;
 }
 
 
