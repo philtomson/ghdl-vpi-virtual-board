@@ -70,26 +70,18 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_module_treeview.set_model(m_module_ref_tree_model);
 	m_module_treeview.expand_all();
 	m_module_treeview.set_activate_on_single_click();
-
-	//Connect signal:
 	m_module_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_module_treeview_row_activated));
 
 
-
-
-
 	/* NETs */
-
-
 	/* Add the TreeView's view columns */
 	m_net_treeview.append_column("Nets",  m_net_model_column.m_col_name);
 	m_net_treeview.append_column("W",     m_net_model_column.m_col_width);
 	m_net_treeview.append_column("IO",    m_net_model_column.m_col_type);
+	/*******************************************************/
 	m_net_value_treeviewcolumn.set_title("Value");
 	m_net_value_treeviewcolumn.pack_start(m_net_value_renderer);
 	m_net_treeview.append_column(m_net_value_treeviewcolumn);
-
-	/*******************************************************/
 	//Tell the view column how to render the model values:
 	m_net_value_treeviewcolumn.set_cell_data_func(m_net_value_renderer,
 			sigc::mem_fun(*this, &InspectorWindow::treeviewcolumn_net_value_on_cell_data));
@@ -138,6 +130,9 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//m_net_treeview.columns_autosize();
 	//m_net_treeview.check_resize();
 	
+	m_net_treeview.set_activate_on_single_click();
+	m_net_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_net_treeview_row_activated));
+
 	Gtk::TreeModel::iterator iter = m_module_ref_tree_model->get_iter("0");
 	if (iter) {
 		row = *iter;
@@ -168,12 +163,24 @@ void InspectorWindow::on_module_treeview_row_activated(const Gtk::TreeModel::Pat
 }
 
 
-void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_row, const ModuleInstance& inst)
+void InspectorWindow::on_net_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+{
+	(void)column;
+	Gtk::TreeModel::iterator iter = column->get_tree_view()->get_model()->get_iter(path);
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		std::cout << "Row activated: " << std::string(row[m_net_model_column.m_col_name]) << std::endl;
+		m_virtual_board->send_message_to_vpi(VBMessage::read_net((ModuleNet*)row[m_net_model_column.m_col_net]));
+	}
+}
+
+
+void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_row, ModuleInstance& inst)
 {
 	int i, s;
 	Glib::RefPtr<Gtk::ListStore> net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
 
-	for (std::vector<ModuleNet>::const_iterator it = inst.nets.cbegin(); it != inst.nets.cend(); ++it) {
+	for (std::vector<ModuleNet>::iterator it = inst.nets.begin(); it != inst.nets.end(); ++it) {
 		Gtk::TreeModel::Row net_row = *(net_ref_tree_model->append());
 		net_row[m_net_model_column.m_col_name] = it->name;
 		net_row[m_net_model_column.m_col_width] = it->width;

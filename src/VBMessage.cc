@@ -20,7 +20,8 @@
 VBMessage::VBMessage() :
 	m_type(VBMessage::MSG_NONE),
 	m_value(0),
-	m_io_name(VBMessage::NONE)
+	m_io_name(VBMessage::NONE),
+	m_pointer(nullptr)
 {
 }
 
@@ -28,7 +29,8 @@ VBMessage::VBMessage() :
 VBMessage::VBMessage(const VBMessage& other) :
 	m_type(other.m_type),
 	m_value(other.m_value),
-	m_io_name(other.m_io_name)
+	m_io_name(other.m_io_name),
+	m_pointer(other.m_pointer)
 {
 }
 
@@ -36,7 +38,8 @@ VBMessage::VBMessage(const VBMessage& other) :
 VBMessage::VBMessage(VBMessage::message_type_t type) :
 	m_type(type),
 	m_value(0),
-	m_io_name(VBMessage::NONE)
+	m_io_name(VBMessage::NONE),
+	m_pointer(nullptr)
 {
 }
 
@@ -44,7 +47,17 @@ VBMessage::VBMessage(VBMessage::message_type_t type) :
 VBMessage::VBMessage(VBMessage::message_type_t type, unsigned int value) :
 	m_type(type),
 	m_value(value),
-	m_io_name(VBMessage::NONE)
+	m_io_name(VBMessage::NONE),
+	m_pointer(nullptr)
+{
+}
+
+
+VBMessage::VBMessage(message_type_t type, void *ptr) :
+	m_type(type),
+	m_value(0),
+	m_io_name(VBMessage::NONE),
+	m_pointer(ptr)
 {
 }
 
@@ -52,7 +65,8 @@ VBMessage::VBMessage(VBMessage::message_type_t type, unsigned int value) :
 VBMessage::VBMessage(VBMessage::message_type_t type, unsigned int value, VBMessage::IO_name_t io_name) :
 	m_type(type),
 	m_value(value),
-	m_io_name(io_name)
+	m_io_name(io_name),
+	m_pointer(nullptr)
 {
 }
 
@@ -72,6 +86,18 @@ unsigned int VBMessage::value() const
 VBMessage::IO_name_t VBMessage::io_name() const
 {
 	return m_io_name;
+}
+
+
+ModuleInstance* VBMessage::module_instance() const
+{
+	return (ModuleInstance*)m_pointer;
+}
+
+
+ModuleNet* VBMessage::module_net() const
+{
+	return (ModuleNet*)m_pointer;
 }
 
 
@@ -110,13 +136,6 @@ VBMessage VBMessage::set_freq(unsigned int n)
 }
 
 
-VBMessage VBMessage::update_signals()
-{
-	VBMessage msg(VBMessage::MSG_UPDATE_SIGNALS);
-	return msg;
-}
-
-
 VBMessage VBMessage::io_changed(VBMessage::IO_name_t io_name, unsigned int value)
 {
 	VBMessage msg(VBMessage::MSG_IO_CHANGED, value, io_name);
@@ -145,16 +164,37 @@ VBMessage VBMessage::running()
 }
 
 
-VBMessage VBMessage::signals_updated()
+VBMessage VBMessage::gui_started()
 {
-	VBMessage msg(VBMessage::MSG_SIGNALS_UPDATED);
+	VBMessage msg(VBMessage::MSG_GUI_STARTED);
 	return msg;
 }
 
 
-VBMessage VBMessage::gui_started()
+VBMessage VBMessage::read_module_nets(ModuleInstance *mod)
 {
-	VBMessage msg(VBMessage::MSG_GUI_STARTED);
+	VBMessage msg(VBMessage::MSG_READ_MODULE_NETS, (void*)mod);
+	return msg;
+}
+
+
+VBMessage VBMessage::module_nets_read(ModuleInstance *mod)
+{
+	VBMessage msg(VBMessage::MSG_MODULE_NETS_READ, (void*)mod);
+	return msg;
+}
+
+
+VBMessage VBMessage::read_net(ModuleNet *net)
+{
+	VBMessage msg(VBMessage::MSG_READ_NET, (void*)net);
+	return msg;
+}
+
+
+VBMessage VBMessage::net_read(ModuleNet *net)
+{
+	VBMessage msg(VBMessage::MSG_NET_READ, (void*)net);
 	return msg;
 }
 
@@ -174,8 +214,6 @@ const char *VBMessage::type_to_s() const
 			return "MSG_STOP";
 		case VBMessage::MSG_SET_FREQ:
 			return "MSG_SET_FREQ";
-		case VBMessage::MSG_UPDATE_SIGNALS:
-			return "MSG_UPDATE_SIGNALS";
 		case VBMessage::MSG_IO_CHANGED:
 			return "MSG_IO_CHANGED";
 		case VBMessage::MSG_CLOCK:
@@ -184,10 +222,16 @@ const char *VBMessage::type_to_s() const
 			return "MSG_STOPPED";
 		case VBMessage::MSG_RUNNING:
 			return "MSG_RUNNING";
-		case VBMessage::MSG_SIGNALS_UPDATED:
-			return "MSG_SIGNALS_UPDATED";
 		case VBMessage::MSG_GUI_STARTED:
 			return "MSG_GUI_STARTED";
+		case VBMessage::MSG_READ_MODULE_NETS:
+			return "MSG_READ_MODULE_NETS";
+		case VBMessage::MSG_MODULE_NETS_READ:
+			return "MSG_MODULE_NETS_READ";
+		case VBMessage::MSG_READ_NET:
+			return "MSG_READ_NET";
+		case VBMessage::MSG_NET_READ:
+			return "MSG_NET_READ";
 	}
 
 	return "Unknown MSG";

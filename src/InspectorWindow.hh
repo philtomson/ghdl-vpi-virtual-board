@@ -43,10 +43,10 @@ protected:
 			add(m_col_net);
 		}
 
-		Gtk::TreeModelColumn<std::string>      m_col_name;
-		Gtk::TreeModelColumn<int>              m_col_width;
-		Gtk::TreeModelColumn<std::string>      m_col_type;
-		Gtk::TreeModelColumn<const ModuleNet*> m_col_net;
+		Gtk::TreeModelColumn<std::string> m_col_name;
+		Gtk::TreeModelColumn<int>         m_col_width;
+		Gtk::TreeModelColumn<std::string> m_col_type;
+		Gtk::TreeModelColumn<ModuleNet*>  m_col_net;
 	};
 
 	/* Tree model columns for modules */
@@ -60,7 +60,7 @@ protected:
 
 		Gtk::TreeModelColumn<std::string>                  m_col_name;
 		Gtk::TreeModelColumn<Glib::RefPtr<Gtk::ListStore>> m_col_net_model;
-		Gtk::TreeModelColumn<const ModuleInstance*>        m_col_module_instance;
+		Gtk::TreeModelColumn<ModuleInstance*>              m_col_module_instance;
 	};
 
 private:
@@ -87,7 +87,8 @@ public:
 private:
 	bool on_my_delete_event(GdkEventAny* any_event);
 	void on_module_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-	void build_module_hierarchy_model(Gtk::TreeModel::Row& row, const ModuleInstance& inst);
+	void on_net_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+	void build_module_hierarchy_model(Gtk::TreeModel::Row& row, ModuleInstance& inst);
 
 	void treeviewcolumn_net_value_on_cell_data(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator& iter);
 };

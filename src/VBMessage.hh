@@ -17,6 +17,9 @@
 #ifndef VB_MESSAGE_HH
 #define VB_MESSAGE_HH
 
+#include "Instance.hh"
+
+
 class VBMessage {
 public:
 	typedef enum {
@@ -48,44 +51,52 @@ public:
 		MSG_RUN_N, // integer
 		MSG_STOP,
 		MSG_SET_FREQ, // integer
-		MSG_UPDATE_SIGNALS,
 		MSG_IO_CHANGED, // IO_name_t, integer
 		MSG_CLOCK,
 		MSG_STOPPED,
 		MSG_RUNNING,
-		MSG_SIGNALS_UPDATED,
-		MSG_GUI_STARTED
+		MSG_GUI_STARTED,
+		MSG_READ_MODULE_NETS, // pointer points to a ModuleInstance
+		MSG_MODULE_NETS_READ, // pointer points to a ModuleInstance
+		MSG_READ_NET, // pointer points to a ModuleNet
+		MSG_NET_READ // pointer points to a ModuleNet
 	} message_type_t;
 
 private:
 	message_type_t m_type;
 	unsigned int   m_value;
 	IO_name_t      m_io_name;
+	void          *m_pointer;
 
 public:
 	VBMessage();
 	VBMessage(const VBMessage& other);
 	VBMessage(message_type_t type);
 	VBMessage(message_type_t type, unsigned int value);
+	VBMessage(message_type_t type, void *ptr);
 	VBMessage(message_type_t type, unsigned int value, IO_name_t io_name);
 
 	message_type_t type() const;
 	unsigned int   value() const;
 	IO_name_t      io_name() const;
 	const char*    type_to_s() const;
+	ModuleInstance* module_instance() const;
+	ModuleNet* module_net() const;
 
 	static VBMessage exit();
 	static VBMessage run();
 	static VBMessage run_n(unsigned int n);
 	static VBMessage stop();
 	static VBMessage set_freq(unsigned int n);
-	static VBMessage update_signals();
 	static VBMessage io_changed(IO_name_t io_name, unsigned int value);
 	static VBMessage clock();
 	static VBMessage stopped();
 	static VBMessage running();
-	static VBMessage signals_updated();
 	static VBMessage gui_started();
+	static VBMessage read_module_nets(ModuleInstance *mod);
+	static VBMessage module_nets_read(ModuleInstance *mod);
+	static VBMessage read_net(ModuleNet *net);
+	static VBMessage net_read(ModuleNet *net);
 };
 
 #endif /* VB_MESSAGE_HH */

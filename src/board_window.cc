@@ -348,7 +348,6 @@ void VBWindow::on_freq_value_changed()
 
 void VBWindow::on_dump_button_clicked()
 {
-	m_virtual_board->send_message_to_vpi(VBMessage::update_signals());
 	m_inspector_window.show_all();
 	m_inspector_window.present();
 }
@@ -483,6 +482,9 @@ void VBWindow::on_notification_from_vpi()
 						break;
 				}
 				break;
+			case VBMessage::MSG_NET_READ:
+				printf("Net %s: %s\n", msg.module_net()->name.c_str(), msg.module_net()->value.c_str());
+				break;
 			case VBMessage::MSG_STOPPED:
 				//printf("MSG_STOPPED\n");
 				m_state_running = false;
@@ -502,10 +504,6 @@ void VBWindow::on_notification_from_vpi()
 				m_playpauseButton.set_icon_name("gtk-media-pause");
 				m_playpauseButton.set_tooltip_text("Stop simulation");
 				m_stepButton.set_sensitive(false);
-				break;
-			case VBMessage::MSG_SIGNALS_UPDATED:
-				printf("MSG_SIGNALS_UPDATED\n");
-				/* TODO */
 				break;
 			default:
 				printf("\e[31mBad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());

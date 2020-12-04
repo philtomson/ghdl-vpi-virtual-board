@@ -114,6 +114,15 @@ static int get_integer_value_from_net(vpiHandle net)
 }
 
 
+static void update_net_value_string(ModuleNet *mn)
+{
+	s_vpi_value val;
+	val.format = vpiBinStrVal;
+	vpi_get_value(mn->handle, &val);
+	mn->value = std::string(val.value.str);
+}
+
+
 static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 {
 	vpiHandle iter, top, net;
@@ -440,6 +449,10 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 						wait_other_messages = true;
 				}
 				break;
+			case VBMessage::MSG_READ_NET:
+				update_net_value_string(msg.module_net());
+				vboard->send_message_to_gui(VBMessage::net_read(msg.module_net()));
+				break;
 			case VBMessage::MSG_NONE:
 				break;
 			case VBMessage::MSG_EXIT:
@@ -471,9 +484,6 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 				break;
 			case VBMessage::MSG_SET_FREQ:
 				vboard->set_timer_frequency(msg.value());
-				break;
-			case VBMessage::MSG_UPDATE_SIGNALS:
-				vboard->send_message_to_gui(VBMessage::signals_updated());
 				break;
 			default:
 				printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());
