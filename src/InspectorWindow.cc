@@ -1,5 +1,6 @@
 #include "InspectorWindow.hh"
 #include "virtual_board.hh"
+//#include <iostream>
 
 
 InspectorWindow::InspectorWindow(VirtualBoard* vb) :
@@ -7,8 +8,8 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_virtual_board(vb),
 	m_headerbar(),
 	m_paned(),
-	m_frame_modules(),
-	m_frame_nets(),
+//	m_frame_modules(),
+//	m_frame_nets(),
 	m_scrollwindow_modules(),
 	m_scrollwindow_nets()
 {
@@ -19,13 +20,14 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	signal_delete_event().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_delete_event));
 	set_size_request(640, 480);
 	//set_border_width(5);
-	m_paned.set_margin_bottom(5);
-	m_paned.set_margin_top(0);
-	m_paned.set_wide_handle();
+//	m_paned.set_margin_bottom(5);
+//	m_paned.set_margin_top(0);
+	m_paned.set_position(213);
+	//m_paned.set_wide_handle();
 	add(m_paned);
 	m_scrollwindow_modules.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	m_scrollwindow_nets.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-#if 1
+#if 0
 	m_frame_modules.add(m_scrollwindow_modules);
 	m_frame_modules.set_shadow_type(Gtk::SHADOW_IN);
 	m_frame_nets.add(m_scrollwindow_nets);
@@ -37,6 +39,10 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_paned.pack1(m_frame_modules, true, true);
 	m_paned.pack2(m_frame_nets, true, false);
 #else
+	m_scrollwindow_modules.set_margin_bottom(5);
+	m_scrollwindow_modules.set_margin_right(1);
+    m_scrollwindow_nets.set_margin_bottom(5);
+    m_scrollwindow_nets.set_margin_left(1);
 	m_paned.pack1(m_scrollwindow_modules, true, true);
 	m_paned.pack2(m_scrollwindow_nets, true, true);
 #endif
@@ -57,46 +63,20 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_module_treeview.append_column("Modules", m_module_model_column.m_col_name);
 	m_module_treeview.set_reorderable();
 	m_module_treeview.set_enable_tree_lines();
+	m_module_treeview.set_show_expanders();
 
 	m_module_treeview.set_model(m_module_ref_tree_model);
 	m_module_treeview.expand_all();
+	m_module_treeview.set_activate_on_single_click();
 
 	//Connect signal:
-	//m_module_treeview.signal_row_activated().connect(sigc::mem_fun(*this,
-	//			&ExampleWindow::on_treeview_row_activated) );
+	m_module_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_module_treeview_row_activated));
 
 
 
 
 
 	/* NETs */
-	m_net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
-
-	/* Fill the TreeView's model */
-
-	row = *(m_net_ref_tree_model->append());
-	row[m_net_model_column.m_col_name] = "titi";
-	row[m_net_model_column.m_col_width] = 5;
-	row[m_net_model_column.m_col_type] = "I";
-	row[m_net_model_column.m_col_value] = "00101";
-
-	row = *(m_net_ref_tree_model->append());
-	row[m_net_model_column.m_col_name] = "rstn";
-	row[m_net_model_column.m_col_width] = 1;
-	row[m_net_model_column.m_col_type] = "I";
-	row[m_net_model_column.m_col_value] = "1";
-
-	row = *(m_net_ref_tree_model->append());
-	row[m_net_model_column.m_col_name] = "george";
-	row[m_net_model_column.m_col_width] = 16;
-	row[m_net_model_column.m_col_type] = "O";
-	row[m_net_model_column.m_col_value] = "1100100111010111";
-
-	row = *(m_net_ref_tree_model->append());
-	row[m_net_model_column.m_col_name] = "tabule";
-	row[m_net_model_column.m_col_width] = 7;
-	row[m_net_model_column.m_col_type] = "";
-	row[m_net_model_column.m_col_value] = "11UU001";
 
 	/* Add the TreeView's view columns */
 	m_net_treeview.append_column("Nets",  m_net_model_column.m_col_name);
@@ -115,10 +95,20 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//This is not necessary, but it's nice to show the feature.
 	//You can use TreeView::set_column_drag_function() to more
 	//finely control column drag and drop.
-	for (guint i = 0; i < 4; i++)
+	for (guint i = 0; i < 4; i++) {
 		m_net_treeview.get_column(i)->set_reorderable();
+		m_net_treeview.get_column(i)->set_resizable();
+	}
 
-	m_net_treeview.set_model(m_net_ref_tree_model);
+	//m_net_treeview.columns_autosize();
+	//m_net_treeview.check_resize();
+	
+	Gtk::TreeModel::iterator iter = m_module_ref_tree_model->get_iter("0");
+	if (iter) {
+		row = *iter;
+		Glib::RefPtr<Gtk::ListStore> top_module_net_list = row[m_module_model_column.m_col_net_model];
+		m_net_treeview.set_model(top_module_net_list);
+	}
 }
 
 
@@ -130,15 +120,51 @@ bool InspectorWindow::on_my_delete_event(GdkEventAny* any_event)
 }
 
 
-void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& row, const ModuleInstance& inst)
+void InspectorWindow::on_module_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+{
+	(void)column;
+	Gtk::TreeModel::iterator iter = m_module_ref_tree_model->get_iter(path);
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		//std::cout << "Row activated: " << std::string(row[m_module_model_column.m_col_name]) << std::endl;
+		Glib::RefPtr<Gtk::ListStore> net_list_model = row[m_module_model_column.m_col_net_model];
+		m_net_treeview.set_model(net_list_model);
+	}
+}
+
+
+void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_row, const ModuleInstance& inst)
 {
 	int i, s;
+	Glib::RefPtr<Gtk::ListStore> net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
 
-	row[m_module_model_column.m_col_name] = inst.name;
+	s = inst.nets.size();
+	for (i = 0; i < s; i++) {
+		Gtk::TreeModel::Row net_row = *(net_ref_tree_model->append());
+		net_row[m_net_model_column.m_col_name] = inst.nets[i].name;
+		net_row[m_net_model_column.m_col_width] = inst.nets[i].width;
+		switch (inst.nets[i].direction) {
+			case 1:
+				net_row[m_net_model_column.m_col_type] = "i";
+				break;
+			case 2:
+				net_row[m_net_model_column.m_col_type] = "o";
+				break;
+			case 3:
+				net_row[m_net_model_column.m_col_type] = "io";
+				break;
+			default:
+				net_row[m_net_model_column.m_col_type] = "";
+		}
+		net_row[m_net_model_column.m_col_value] = std::string((size_t)inst.nets[i].width, 'U');
+	}
+
+	module_row[m_module_model_column.m_col_name] = inst.name;
+	module_row[m_module_model_column.m_col_net_model] = net_ref_tree_model;
 
 	s = inst.modules.size();
 	for (i = 0; i < s; i++) {
-		Gtk::TreeModel::Row childrow = *(m_module_ref_tree_model->append(row.children()));
+		Gtk::TreeModel::Row childrow = *(m_module_ref_tree_model->append(module_row.children()));
 		build_module_hierarchy_model(childrow, inst.modules[i]);
 	}
 }
