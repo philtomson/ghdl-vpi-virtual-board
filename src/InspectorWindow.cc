@@ -89,6 +89,8 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//Tell the view column how to render the model values:
 	m_net_value_treeviewcolumn.set_cell_data_func(m_net_value_renderer,
 			sigc::mem_fun(*this, &InspectorWindow::treeviewcolumn_net_value_on_cell_data));
+	m_net_value_renderer.property_family() = "Monospace";
+	//m_net_value_renderer.property_style() = Pango::STYLE_ITALIC;
 
 //	//Make the CellRenderer editable, and handle its editing signals:
 //	m_net_value_renderer.property_editable() = true;
