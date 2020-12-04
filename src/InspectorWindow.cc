@@ -162,7 +162,6 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 
 	//Add the TreeView's view columns:
 	m_module_treeview.append_column("Modules", m_module_model_column.m_col_name);
-	m_module_treeview.set_reorderable();
 	m_module_treeview.set_enable_tree_lines();
 	m_module_treeview.set_show_expanders();
 
@@ -209,7 +208,6 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//m_net_treeview.get_column(2)->get_first_cell()->set_alignment(0.5f, 0.5f);
 	m_net_treeview.get_column_cell_renderer(2)->set_alignment(0.5f, 0.5f);
 
-	m_module_treeview.set_reorderable();
 	m_net_treeview.set_rules_hint();
 	//m_net_treeview.set_rubber_banding();
 	//m_net_treeview.set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_BOTH); //TREE_VIEW_GRID_LINES_HORIZONTAL
