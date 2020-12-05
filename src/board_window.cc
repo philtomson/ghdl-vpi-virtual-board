@@ -57,6 +57,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_switchesval(0),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_toolBar1(),
+	m_boardEventBox(),
 	m_boxBoard(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_statusBar(),
 	m_boxSwitchAndLed(Gtk::Orientation::ORIENTATION_VERTICAL),
@@ -168,7 +169,8 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 
 	m_boxMain.pack_start(m_toolBar1, Gtk::PACK_SHRINK, 0);
 
-	m_boxMain.pack_start(m_boxBoard, Gtk::PACK_EXPAND_WIDGET, 0);
+	m_boardEventBox.add(m_boxBoard);
+	m_boxMain.pack_start(m_boardEventBox, Gtk::PACK_EXPAND_WIDGET, 0);
 	m_boxMain.pack_start(m_statusBar, Gtk::PACK_SHRINK, 0);
 
 	m_boxBoard.override_background_color(Gdk::RGBA("rgb(43, 187, 77)"), Gtk::StateFlags::STATE_FLAG_NORMAL);
@@ -297,12 +299,82 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_dispatcher.connect(sigc::mem_fun(*this, &VBWindow::on_notification_from_vpi));
 	signal_delete_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_delete_event));
 
+	m_boardEventBox.set_can_focus(true);
+	m_boardEventBox.add_events(Gdk::BUTTON_PRESS_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	m_boardEventBox.signal_button_press_event().connect(sigc::mem_fun(*this, &VBWindow::on_main_board_button_press_event));
+	m_boardEventBox.signal_key_press_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_keyboard_event));
+	m_boardEventBox.signal_key_release_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_keyboard_event));
+
 	show_all();
 
 	m_virtual_board->send_message_to_vpi(VBMessage::gui_started());
 
 //	m_boxMain.pack_start(led1, Gtk::PACK_SHRINK, 0);
 //	m_boxMain.pack_start(led1, Gtk::PACK_EXPAND_PADDING, 0);
+}
+
+
+bool VBWindow::on_main_board_button_press_event(const GdkEventButton* button_event)
+{
+	(void)button_event;
+	m_boardEventBox.grab_focus();
+	return false;
+}
+
+
+bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
+{
+	if (event->type == GDK_KEY_PRESS) {
+		switch (event->keyval) {
+			case GDK_KEY_space:
+				printf("play/pause\n");
+				break;
+			case GDK_KEY_S:
+			case GDK_KEY_s:
+				printf("step\n");
+				break;
+			case GDK_KEY_R:
+			case GDK_KEY_r:
+				printf("reset\n");
+				break;
+			case GDK_KEY_KP_5:
+				printf("center\n");
+				break;
+			case GDK_KEY_KP_8:
+				printf("up\n");
+				break;
+			case GDK_KEY_KP_2:
+				printf("down\n");
+				break;
+			case GDK_KEY_KP_6:
+				printf("right\n");
+				break;
+			case GDK_KEY_KP_4:
+				printf("left\n");
+				break;
+		}
+	}
+	else if (event->type == GDK_KEY_RELEASE) {
+		switch (event->keyval) {
+			case GDK_KEY_KP_5:
+				printf("center_\n");
+				break;
+			case GDK_KEY_KP_8:
+				printf("up_\n");
+				break;
+			case GDK_KEY_KP_2:
+				printf("down_\n");
+				break;
+			case GDK_KEY_KP_6:
+				printf("right_\n");
+				break;
+			case GDK_KEY_KP_4:
+				printf("left_\n");
+				break;
+		}
+	}
+
+	return false;
 }
 
 

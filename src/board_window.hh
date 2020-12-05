@@ -27,6 +27,7 @@
 #include <gtkmm/toolitem.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/separatortoolitem.h>
+#include <gtkmm/eventbox.h>
 #include <gtkmm/image.h>
 #include <glibmm/dispatcher.h>
 #include "switch.hh"
@@ -53,6 +54,7 @@ protected:
 	unsigned int               m_switchesval;
 	Gtk::Box                   m_boxMain;
 	Gtk::Toolbar               m_toolBar1;
+	Gtk::EventBox              m_boardEventBox;
 	Gtk::Box                   m_boxBoard;
 	Gtk::Statusbar             m_statusBar;
 	Gtk::Box                   m_boxSwitchAndLed;
@@ -119,6 +121,8 @@ protected:
 	void on_freq_value_changed();
 	void on_dump_button_clicked();
 	bool on_my_delete_event(GdkEventAny* any_event);
+	bool on_main_board_button_press_event(const GdkEventButton* button_event);
+	bool on_my_keyboard_event(GdkEventKey* event);
 
 	void on_notification_from_vpi();
 };
