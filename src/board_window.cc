@@ -324,6 +324,9 @@ bool VBWindow::on_main_board_button_press_event(const GdkEventButton* button_eve
 
 bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 {
+	static bool switch_pressed[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+	bool try_switches = false;
+
 	if (event->type == GDK_KEY_PRESS) {
 		switch (event->keyval) {
 			case GDK_KEY_space:
@@ -333,8 +336,7 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 			case GDK_KEY_s:
 				printf("step\n");
 				break;
-			case GDK_KEY_R:
-			case GDK_KEY_r:
+			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(true);
 				break;
 			case GDK_KEY_KP_5:
@@ -352,12 +354,113 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 			case GDK_KEY_KP_4:
 				m_pushbuttons[3]->set_state(true);
 				break;
+			default:
+				try_switches = true;
+		}
+		if (try_switches) {
+			switch (event->hardware_keycode) {
+				case 61:
+					if (!switch_pressed[0]) {
+						m_switches[0]->toggle();
+						switch_pressed[0] = true;
+					}
+					break;
+				case 60:
+					if (!switch_pressed[1]) {
+						m_switches[1]->toggle();
+						switch_pressed[1] = true;
+					}
+					break;
+				case 59:
+					if (!switch_pressed[2]) {
+						m_switches[2]->toggle();
+						switch_pressed[2] = true;
+					}
+					break;
+				case 58:
+					if (!switch_pressed[3]) {
+						m_switches[3]->toggle();
+						switch_pressed[3] = true;
+					}
+					break;
+				case 57:
+					if (!switch_pressed[4]) {
+						m_switches[4]->toggle();
+						switch_pressed[4] = true;
+					}
+					break;
+				case 56:
+					if (!switch_pressed[5]) {
+						m_switches[5]->toggle();
+						switch_pressed[5] = true;
+					}
+					break;
+				case 55:
+					if (!switch_pressed[6]) {
+						m_switches[6]->toggle();
+						switch_pressed[6] = true;
+					}
+					break;
+				case 54:
+					if (!switch_pressed[7]) {
+						m_switches[7]->toggle();
+						switch_pressed[7] = true;
+					}
+					break;
+				case 48:
+					if (!switch_pressed[8]) {
+						m_switches[8]->toggle();
+						switch_pressed[8] = true;
+					}
+					break;
+				case 47:
+					if (!switch_pressed[9]) {
+						m_switches[9]->toggle();
+						switch_pressed[9] = true;
+					}
+					break;
+				case 46:
+					if (!switch_pressed[10]) {
+						m_switches[10]->toggle();
+						switch_pressed[10] = true;
+					}
+					break;
+				case 45:
+					if (!switch_pressed[11]) {
+						m_switches[11]->toggle();
+						switch_pressed[11] = true;
+					}
+					break;
+				case 44:
+					if (!switch_pressed[12]) {
+						m_switches[12]->toggle();
+						switch_pressed[12] = true;
+					}
+					break;
+				case 43:
+					if (!switch_pressed[13]) {
+						m_switches[13]->toggle();
+						switch_pressed[13] = true;
+					}
+					break;
+				case 42:
+					if (!switch_pressed[14]) {
+						m_switches[14]->toggle();
+						switch_pressed[14] = true;
+					}
+					break;
+				case 41:
+					if (!switch_pressed[15]) {
+						m_switches[15]->toggle();
+						switch_pressed[15] = true;
+					}
+					break;
+			}
 		}
 	}
 	else if (event->type == GDK_KEY_RELEASE) {
 		switch (event->keyval) {
-			case GDK_KEY_R:
-			case GDK_KEY_r:
+			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(false);
 				break;
 			case GDK_KEY_KP_5:
@@ -375,6 +478,60 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 			case GDK_KEY_KP_4:
 				m_pushbuttons[3]->set_state(false);
 				break;
+			default:
+				try_switches = true;
+		}
+		if (try_switches) {
+			switch (event->hardware_keycode) {
+				case 61:
+					switch_pressed[0] = false;
+					break;
+				case 60:
+					switch_pressed[1] = false;
+					break;
+				case 59:
+					switch_pressed[2] = false;
+					break;
+				case 58:
+					switch_pressed[3] = false;
+					break;
+				case 57:
+					switch_pressed[4] = false;
+					break;
+				case 56:
+					switch_pressed[5] = false;
+					break;
+				case 55:
+					switch_pressed[6] = false;
+					break;
+				case 54:
+					switch_pressed[7] = false;
+					break;
+				case 48:
+					switch_pressed[8] = false;
+					break;
+				case 47:
+					switch_pressed[9] = false;
+					break;
+				case 46:
+					switch_pressed[10] = false;
+					break;
+				case 45:
+					switch_pressed[11] = false;
+					break;
+				case 44:
+					switch_pressed[12] = false;
+					break;
+				case 43:
+					switch_pressed[13] = false;
+					break;
+				case 42:
+					switch_pressed[14] = false;
+					break;
+				case 41:
+					switch_pressed[15] = false;
+					break;
+			}
 		}
 	}
 

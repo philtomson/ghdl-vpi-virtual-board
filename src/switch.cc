@@ -66,6 +66,28 @@ bool Switch::get_state()
 }
 
 
+bool Switch::toggle()
+{
+	m_state = !m_state;
+	if (m_state) {
+		if (m_hoovered)
+			m_pixbuf = m_pixbuf_on_s;
+		else
+			m_pixbuf = m_pixbuf_on;
+	}
+	else {
+		if (m_hoovered)
+			m_pixbuf = m_pixbuf_off_s;
+		else
+			m_pixbuf = m_pixbuf_off;
+	}
+	queue_draw();
+	exec_callback();
+	statusbar_update();
+	return true;
+}
+
+
 void Switch::set_callback_function(Switch::switch_callbackfun fun, void *arg)
 {
 	m_cbarg = arg;

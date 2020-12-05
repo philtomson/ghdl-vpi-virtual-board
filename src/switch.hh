@@ -29,6 +29,7 @@ public:
 	Switch();
 	virtual ~Switch();
 	bool get_state();
+	bool toggle();
 	void set_callback_function(switch_callbackfun fun, void *arg);
 	void set_statusbar(Gtk::Statusbar& sb, int switchnum);
 
