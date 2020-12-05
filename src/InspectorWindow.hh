@@ -18,7 +18,7 @@
 #define INSPECTOR_WINDOW_HH
 
 #include <gtkmm/window.h>
-#include <gtkmm/headerbar.h>
+//#include <gtkmm/headerbar.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
@@ -27,7 +27,7 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
-//#include <gtkmm/frame.h>
+#include <gtkmm/frame.h>
 #include "Instance.hh"
 
 
@@ -96,10 +96,10 @@ public:
 
 private:
 	VirtualBoard       *m_virtual_board;
-	Gtk::HeaderBar      m_headerbar;
+//	Gtk::HeaderBar      m_headerbar;
 	Gtk::Paned          m_paned;
-//	Gtk::Frame          m_frame_modules;
-//	Gtk::Frame          m_frame_nets;
+	Gtk::Frame          m_frame_modules;
+	Gtk::Frame          m_frame_nets;
 	Gtk::ScrolledWindow m_scrollwindow_modules;
 	Gtk::ScrolledWindow m_scrollwindow_nets;
 

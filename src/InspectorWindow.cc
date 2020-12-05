@@ -116,10 +116,10 @@ void SignalTreeView::on_hexa_selected()
 InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	Gtk::Window(),
 	m_virtual_board(vb),
-	m_headerbar(),
+//	m_headerbar(),
 	m_paned(),
-//	m_frame_modules(),
-//	m_frame_nets(),
+	m_frame_modules(),
+	m_frame_nets(),
 	m_scrollwindow_modules(),
 	m_scrollwindow_nets(),
 	m_net_value_renderer(),
@@ -128,9 +128,10 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_timeout_connection()
 {
 	set_icon_name("gtk-find");
-	m_headerbar.set_title("Signal inspector");
-	m_headerbar.set_show_close_button();
-	set_titlebar(m_headerbar);
+	set_title("Signal inspector");
+//	m_headerbar.set_title("Signal inspector");
+//	m_headerbar.set_show_close_button();
+//	set_titlebar(m_headerbar);
 	signal_show().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_show));
 	signal_hide().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_hide));
 	signal_delete_event().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_delete_event));
@@ -143,15 +144,15 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	add(m_paned);
 	m_scrollwindow_modules.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	m_scrollwindow_nets.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-#if 0
+#if 1
+	set_border_width(8);
+	//m_paned.set_wide_handle();
 	m_frame_modules.add(m_scrollwindow_modules);
 	m_frame_modules.set_shadow_type(Gtk::SHADOW_IN);
 	m_frame_nets.add(m_scrollwindow_nets);
 	m_frame_nets.set_shadow_type(Gtk::SHADOW_IN);
-	//m_frame_modules.set_margin_left(0);
-	//m_frame_modules.set_margin_right(0);
-	//m_frame_nets.set_margin_left(0);
-	//m_frame_nets.set_margin_right(0);
+	m_frame_nets.set_margin_left(8);
+	m_frame_modules.set_margin_right(8);
 	m_paned.pack1(m_frame_modules, true, true);
 	m_paned.pack2(m_frame_nets, true, false);
 #else
