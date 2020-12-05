@@ -15,6 +15,7 @@
  */
 
 #include <gtkmm/treeselection.h>
+#include <cmath>
 #include "InspectorWindow.hh"
 #include "virtual_board.hh"
 #include <iostream>
@@ -370,6 +371,7 @@ std::string InspectorWindow::binary_to_decimal(const std::string& binary)
 {
 	bool valid = true;
 	unsigned long val = 0;
+	unsigned int totlen = (int)std::ceil(std::log10(std::pow(2, binary.size())));
 	for (std::string::const_iterator it = binary.cbegin(); it != binary.cend(); ++it) {
 		val <<= 1;
 		if (*it == '1' || *it == 'H')
@@ -382,7 +384,11 @@ std::string InspectorWindow::binary_to_decimal(const std::string& binary)
 	if (!valid)
 		return std::string("Unknown");
 
-	return std::to_string(val);
+	std::string np = std::to_string(val);
+
+	if (np.size() >= totlen)
+		return np;
+	return std::string(totlen - np.size(), ' ') + np;
 }
 
 
