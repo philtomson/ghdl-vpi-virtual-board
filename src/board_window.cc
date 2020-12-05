@@ -356,8 +356,10 @@ void VBWindow::on_dump_button_clicked()
 bool VBWindow::on_my_delete_event(GdkEventAny* any_event)
 {
 	(void)any_event;
+	m_inspector_window.close();
 	m_closing = true;
 	m_virtual_board->send_message_to_vpi(VBMessage::exit());
+	hide();
 	return false;
 }
 
@@ -484,10 +486,7 @@ void VBWindow::on_notification_from_vpi()
 				break;
 			case VBMessage::MSG_MODULE_NETS_READ:
 				//printf("Nets of module %s updated\n", msg.module_instance()->name.c_str());
-				for (std::vector<ModuleNet>::iterator it = msg.module_instance()->nets.begin(); it != msg.module_instance()->nets.end(); ++it) {
-					if (it->value_changed)
-						m_inspector_window.update_net_row(*it);
-				}
+				m_inspector_window.update_module_signals_model(*msg.module_instance());
 				break;
 			case VBMessage::MSG_NET_READ:
 				printf("Net %s: %s\n", msg.module_net()->name.c_str(), msg.module_net()->value.c_str());

@@ -20,8 +20,7 @@
 #include <vector>
 #include <string>
 #include <vpi_user.h>
-#include <gtkmm/treeiter.h>
-//#include <gtkmm/treemodel.h>
+#include <gtkmm/treemodel.h>
 
 
 class ModuleNet {
@@ -31,7 +30,6 @@ public:
 	int                  direction; // 0: none, 1: input, 2: output, 3: inout
 	vpiHandle            handle;
 	std::string          value;
-	Gtk::TreeIter        row;
 	bool                 value_changed;
 
 	ModuleNet();
@@ -45,6 +43,7 @@ public:
 	std::string name;
 	std::vector<ModuleInstance> modules;
 	std::vector<ModuleNet> nets;
+	Glib::RefPtr<Gtk::TreeModel> signal_liststore;
 
 	ModuleInstance();
 

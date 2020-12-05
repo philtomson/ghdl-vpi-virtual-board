@@ -7,7 +7,6 @@ ModuleNet::ModuleNet() :
 	direction(0),
 	handle(nullptr),
 	value(),
-	row(),
 	value_changed(false)
 {
 }
@@ -35,7 +34,8 @@ std::string ModuleNet::to_s()
 ModuleInstance::ModuleInstance() :
 	name(),
 	modules(),
-	nets()
+	nets(),
+	signal_liststore()
 {
 }
 

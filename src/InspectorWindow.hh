@@ -118,7 +118,7 @@ private:
 public:
 	InspectorWindow(VirtualBoard *vb);
 
-	void update_net_row(const ModuleNet& mn);
+	void update_module_signals_model(const ModuleInstance& mi);
 
 private:
 	bool on_my_delete_event(GdkEventAny* any_event);

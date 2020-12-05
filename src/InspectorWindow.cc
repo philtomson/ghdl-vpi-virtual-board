@@ -296,10 +296,15 @@ void InspectorWindow::on_module_treeview_row_activated(const Gtk::TreeModel::Pat
 // }
 
 
-void InspectorWindow::update_net_row(const ModuleNet& mn)
+void InspectorWindow::update_module_signals_model(const ModuleInstance& mi)
 {
-	Gtk::TreeModel::Row net_row = *(mn.row);
-	net_row[m_net_model_column.m_col_dumy] = net_row[m_net_model_column.m_col_dumy] xor true;
+	Glib::RefPtr<Gtk::TreeModel> signal_liststore = mi.signal_liststore;
+	Gtk::TreeModel::Children children = signal_liststore->children();
+	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
+		Gtk::TreeModel::Row row = *iter;
+		if (((ModuleNet*)row[m_net_model_column.m_col_net])->value_changed)
+			row[m_net_model_column.m_col_dumy] = row[m_net_model_column.m_col_dumy] xor true;
+	}
 }
 
 
@@ -309,8 +314,7 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 	Glib::RefPtr<Gtk::ListStore> net_ref_tree_model = Gtk::ListStore::create(m_net_model_column);
 
 	for (std::vector<ModuleNet>::iterator it = inst.nets.begin(); it != inst.nets.end(); ++it) {
-		it->row = net_ref_tree_model->append();
-		Gtk::TreeModel::Row net_row = *(it->row);
+		Gtk::TreeModel::Row net_row = *(net_ref_tree_model->append());
 		net_row[m_net_model_column.m_col_name] = it->name;
 		net_row[m_net_model_column.m_col_width] = it->width;
 		switch (it->direction) {
@@ -333,6 +337,8 @@ void InspectorWindow::build_module_hierarchy_model(Gtk::TreeModel::Row& module_r
 
 	module_row[m_module_model_column.m_col_name] = inst.name;
 	module_row[m_module_model_column.m_col_module_instance] = &inst;
+
+	inst.signal_liststore = net_ref_tree_model;
 
 	s = inst.modules.size();
 	for (i = 0; i < s; i++) {
