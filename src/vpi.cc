@@ -637,8 +637,10 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 
 	gather_toplevel_IO_nets(*vboard);
 
-	if (!vboard->clk_net)
-		vpi_printf("\e[33mInput net clk[1] NOT FOUND\e[0m\n");
+	if (!vboard->clk_net) {
+		vpi_printf("\e[31mError: Did no find an input net named \"clk\" of one bit.\e[0m\n");
+		return 0;
+	}
 	if (!vboard->rstn_net)
 		vpi_printf("\e[33mInput net rstn[1] NOT FOUND\e[0m\n");
 	if (!vboard->switches_net)

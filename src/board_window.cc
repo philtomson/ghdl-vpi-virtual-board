@@ -79,7 +79,6 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_nstep_toolitem(),
 	m_nstep_spinbutton(),
 	m_separator_1(),
-	m_nvtpr_label("nVTPR:"),
 	m_freq_label_toolitem(),
 	m_freq_label("Freq:"),
 	m_freq_toolitem(),

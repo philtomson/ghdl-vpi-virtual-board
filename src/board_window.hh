@@ -75,7 +75,6 @@ protected:
 	Gtk::ToolItem              m_nstep_toolitem;
 	Gtk::SpinButton            m_nstep_spinbutton;
 	Gtk::SeparatorToolItem     m_separator_1;
-	Gtk::Label                 m_nvtpr_label;
 	Gtk::ToolItem              m_freq_label_toolitem;
 	Gtk::Label                 m_freq_label;
 	Gtk::ToolItem              m_freq_toolitem;
