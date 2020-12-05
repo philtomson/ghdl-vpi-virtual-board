@@ -325,16 +325,25 @@ bool VBWindow::on_main_board_button_press_event(const GdkEventButton* button_eve
 bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 {
 	static bool switch_pressed[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+	static bool space_pressed = false, s_pressed = false;
 	bool try_switches = false;
 
 	if (event->type == GDK_KEY_PRESS) {
 		switch (event->keyval) {
 			case GDK_KEY_space:
-				printf("play/pause\n");
+				if (!space_pressed) {
+					m_playpauseButton.activate();
+					printf("space\n");
+					space_pressed = true;
+				}
 				break;
 			case GDK_KEY_S:
 			case GDK_KEY_s:
-				printf("step\n");
+				if (!s_pressed) {
+					printf("s\n");
+					m_stepButton.activate();
+					s_pressed = true;
+				}
 				break;
 			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(true);
@@ -460,6 +469,13 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 	}
 	else if (event->type == GDK_KEY_RELEASE) {
 		switch (event->keyval) {
+			case GDK_KEY_space:
+				space_pressed = false;
+				break;
+			case GDK_KEY_S:
+			case GDK_KEY_s:
+				s_pressed = false;
+				break;
 			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(false);
 				break;
