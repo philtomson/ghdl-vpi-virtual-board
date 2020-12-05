@@ -39,7 +39,9 @@ static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double de
 		vpi_printf("\e[31mERROR: Cannot register cbAfterDelay\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	//vpi_free_object(callback_handle);
+#ifndef VPI_DO_NOT_FREE_CALLBACK_HANDLES
+	vpi_free_object(callback_handle);
+#endif
 }
 
 
@@ -59,7 +61,9 @@ static void register_cb_at_last_known_delta(PLI_INT32 (*cb_rtn)(struct t_cb_data
 	callback_handle = vpi_register_cb(&cb);
 	if (!callback_handle)
 		vpi_printf("\e[31mERROR: Cannot register cbReadWriteSynch callback!\e[0m\n");
-	//vpi_free_object(callback_handle);
+#ifndef VPI_DO_NOT_FREE_CALLBACK_HANDLES
+	vpi_free_object(callback_handle);
+#endif
 }
 
 
@@ -83,7 +87,9 @@ static void register_value_change_cb(PLI_INT32 (*cb_rtn)(struct t_cb_data *), vp
 	callback_handle = vpi_register_cb(&cb);
 	if (!callback_handle)
 		vpi_printf ("\e[31mERROR: Cannot register cbValueChange call back\e[0m\n");
-	//vpi_free_object(callback_handle);
+#ifndef VPI_DO_NOT_FREE_CALLBACK_HANDLES
+	vpi_free_object(callback_handle);
+#endif
 }
 
 
@@ -715,7 +721,9 @@ static void entry_point_cb()
 		vpi_printf("\e[31mERROR: Cannot register cbStartOfSimulation call back\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	//vpi_free_object(callback_handle);
+#ifndef VPI_DO_NOT_FREE_CALLBACK_HANDLES
+	vpi_free_object(callback_handle);
+#endif
 
 	/* Register end of simulation callback */
 	cb.reason = cbEndOfSimulation;
@@ -727,7 +735,9 @@ static void entry_point_cb()
 		vpi_printf("\e[31mERROR: Cannot register cbEndOfSimulation call back\e[0m\n");
 		exit(EXIT_FAILURE);
 	}
-	//vpi_free_object(callback_handle);
+#ifndef VPI_DO_NOT_FREE_CALLBACK_HANDLES
+	vpi_free_object(callback_handle);
+#endif
 }
 
 
