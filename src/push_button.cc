@@ -71,6 +71,32 @@ bool PushButton::get_state()
 }
 
 
+bool PushButton::set_state(bool state)
+{
+	if (state != m_state) {
+		m_state = state;
+		if (m_state) {
+			if (m_hoovered)
+				m_pixbuf = m_pixbuf_on_s;
+			else
+				m_pixbuf = m_pixbuf_on;
+		}
+		else {
+			if (m_hoovered)
+				m_pixbuf = m_pixbuf_off_s;
+			else
+				m_pixbuf = m_pixbuf_off;
+		}
+		queue_draw();
+		exec_callback();
+		statusbar_update();
+		return true;
+	}
+
+	return false;
+}
+
+
 void PushButton::set_callback_function(PushButton::push_button_callbackfun fun, void *arg)
 {
 	m_cbarg = arg;

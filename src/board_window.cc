@@ -335,41 +335,45 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 				break;
 			case GDK_KEY_R:
 			case GDK_KEY_r:
-				printf("reset\n");
+				m_rstnbnt.set_state(true);
 				break;
 			case GDK_KEY_KP_5:
-				printf("center\n");
+				m_pushbuttons[0]->set_state(true);
 				break;
 			case GDK_KEY_KP_8:
-				printf("up\n");
+				m_pushbuttons[2]->set_state(true);
 				break;
 			case GDK_KEY_KP_2:
-				printf("down\n");
+				m_pushbuttons[4]->set_state(true);
 				break;
 			case GDK_KEY_KP_6:
-				printf("right\n");
+				m_pushbuttons[1]->set_state(true);
 				break;
 			case GDK_KEY_KP_4:
-				printf("left\n");
+				m_pushbuttons[3]->set_state(true);
 				break;
 		}
 	}
 	else if (event->type == GDK_KEY_RELEASE) {
 		switch (event->keyval) {
+			case GDK_KEY_R:
+			case GDK_KEY_r:
+				m_rstnbnt.set_state(false);
+				break;
 			case GDK_KEY_KP_5:
-				printf("center_\n");
+				m_pushbuttons[0]->set_state(false);
 				break;
 			case GDK_KEY_KP_8:
-				printf("up_\n");
+				m_pushbuttons[2]->set_state(false);
 				break;
 			case GDK_KEY_KP_2:
-				printf("down_\n");
+				m_pushbuttons[4]->set_state(false);
 				break;
 			case GDK_KEY_KP_6:
-				printf("right_\n");
+				m_pushbuttons[1]->set_state(false);
 				break;
 			case GDK_KEY_KP_4:
-				printf("left_\n");
+				m_pushbuttons[3]->set_state(false);
 				break;
 		}
 	}

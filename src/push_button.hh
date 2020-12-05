@@ -33,6 +33,7 @@ public:
 	PushButton(push_button_pads_orientation_t pads_orientation = PUSH_BUTTON_PADS_HORIZONTAL, bool active_high = true);
 	virtual ~PushButton();
 	bool get_state();
+	bool set_state(bool state);
 	void set_callback_function(push_button_callbackfun fun, void *arg);
 	void set_statusbar(Gtk::Statusbar& sb, std::string const& button_name);
 
