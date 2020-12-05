@@ -179,6 +179,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_module_treeview.append_column("Modules", m_module_model_column.m_col_name);
 	m_module_treeview.set_enable_tree_lines();
 	m_module_treeview.set_show_expanders();
+	m_module_treeview.set_enable_search();
 
 	m_module_treeview.set_model(m_module_ref_tree_model);
 	m_module_treeview.expand_all();
@@ -212,6 +213,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 //	m_net_value_renderer.signal_edited().connect(sigc::mem_fun(*this,
 //				&InspectorWindow::cellrenderer_net_value_on_edited));
 	/*******************************************************/
+	m_net_treeview.get_column(0)->set_min_width(25);
 	m_net_treeview.get_column(1)->set_alignment(Gtk::ALIGN_CENTER);
 	m_net_treeview.get_column(2)->set_alignment(Gtk::ALIGN_CENTER);
 	m_net_treeview.get_column(1)->set_min_width(25);
@@ -222,6 +224,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_net_treeview.get_column(2)->set_min_width(25);
 	//m_net_treeview.get_column(2)->get_first_cell()->set_alignment(0.5f, 0.5f);
 	m_net_treeview.get_column_cell_renderer(2)->set_alignment(0.5f, 0.5f);
+	m_net_treeview.get_column(3)->set_min_width(30);
 
 	m_net_treeview.set_rules_hint();
 	//m_net_treeview.set_rubber_banding();
@@ -236,7 +239,8 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//You can use TreeView::set_column_drag_function() to more
 	//finely control column drag and drop.
 	for (guint i = 0; i < 4; i++) {
-		m_net_treeview.get_column(i)->set_reorderable();
+		if (i > 0)
+			m_net_treeview.get_column(i)->set_reorderable();
 		m_net_treeview.get_column(i)->set_resizable();
 		//m_net_treeview.get_column(i)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
 		m_net_treeview.get_column(i)->set_expand(false);
@@ -245,6 +249,8 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//m_net_treeview.columns_autosize();
 	//m_net_treeview.check_resize();
 	
+	m_net_treeview.set_reorderable();
+	m_net_treeview.set_enable_search();
 	m_net_treeview.set_activate_on_single_click();
 //	m_net_treeview.signal_row_activated().connect(sigc::mem_fun(*this, &InspectorWindow::on_net_treeview_row_activated));
 
