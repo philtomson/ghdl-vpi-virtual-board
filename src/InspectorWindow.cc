@@ -34,6 +34,7 @@ SignalTreeView::SignalTreeView() :
 	m_hexa_menuitem.signal_activate().connect(sigc::mem_fun(*this, &SignalTreeView::on_hexa_selected));
 	m_menu.append(m_decimal_menuitem);
 	m_decimal_menuitem.signal_activate().connect(sigc::mem_fun(*this, &SignalTreeView::on_decimal_selected));
+	get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
 	m_menu.show_all();
 }
 
@@ -51,11 +52,13 @@ void SignalTreeView::set_column_model(const NetModelColumns& model_columns)
 
 bool SignalTreeView::on_button_press_event(GdkEventButton *button_event)
 {
-	bool ret = false;
+	bool ret = true;
 
-	ret = TreeView::on_button_press_event(button_event);
+	if (get_selection()->count_selected_rows() < 2 || button_event->type != GDK_BUTTON_PRESS || button_event->button != 3) {
+		ret = TreeView::on_button_press_event(button_event);
+	}
 
-	if ((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3))
+	if ((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3) && get_selection()->count_selected_rows() > 0)
 		m_menu.popup_at_pointer((GdkEvent*)button_event);
 
 	return ret;
@@ -64,38 +67,49 @@ bool SignalTreeView::on_button_press_event(GdkEventButton *button_event)
 
 void SignalTreeView::on_binary_selected()
 {
-	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
-	if (ref_selection) {
-		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
-		if (iter) {
+	const Glib::RefPtr<Gtk::TreeSelection> selection = get_selection();
+	Glib::RefPtr<Gtk::TreeModel> model = selection->get_model();
+	std::vector<Gtk::TreeModel::Path> paths = selection->get_selected_rows();
+	for (std::vector<Gtk::TreeModel::Path>::const_iterator path = paths.cbegin(); path != paths.cend(); ++path) {
+		Gtk::TreeModel::iterator iter = model->get_iter(*path);
+		if (iter)
 			(*iter)[m_model_columns->m_col_format] = 0;
-		}
+	}
+//	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
+//	if (ref_selection) {
+//		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
+//		if (iter) {
+//			(*iter)[m_model_columns->m_col_format] = 0;
+//		}
+//	}
+}
+
+
+void SignalTreeView::on_decimal_selected()
+{
+	const Glib::RefPtr<Gtk::TreeSelection> selection = get_selection();
+	Glib::RefPtr<Gtk::TreeModel> model = selection->get_model();
+	std::vector<Gtk::TreeModel::Path> paths = selection->get_selected_rows();
+	for (std::vector<Gtk::TreeModel::Path>::const_iterator path = paths.cbegin(); path != paths.cend(); ++path) {
+		Gtk::TreeModel::iterator iter = model->get_iter(*path);
+		if (iter)
+			(*iter)[m_model_columns->m_col_format] = 1;
 	}
 }
 
 
 void SignalTreeView::on_hexa_selected()
 {
-	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
-	if (ref_selection) {
-		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
-		if (iter) {
+	const Glib::RefPtr<Gtk::TreeSelection> selection = get_selection();
+	Glib::RefPtr<Gtk::TreeModel> model = selection->get_model();
+	std::vector<Gtk::TreeModel::Path> paths = selection->get_selected_rows();
+	for (std::vector<Gtk::TreeModel::Path>::const_iterator path = paths.cbegin(); path != paths.cend(); ++path) {
+		Gtk::TreeModel::iterator iter = model->get_iter(*path);
+		if (iter)
 			(*iter)[m_model_columns->m_col_format] = 2;
-		}
 	}
 }
 
-
-void SignalTreeView::on_decimal_selected()
-{
-	Glib::RefPtr<Gtk::TreeSelection> ref_selection = get_selection();
-	if (ref_selection) {
-		Gtk::TreeModel::iterator iter = ref_selection->get_selected();
-		if (iter) {
-			(*iter)[m_model_columns->m_col_format] = 1;
-		}
-	}
-}
 
 
 InspectorWindow::InspectorWindow(VirtualBoard* vb) :
