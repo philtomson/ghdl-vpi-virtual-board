@@ -312,6 +312,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_playpauseButton.add_accelerator("clicked", m_accel_group, GDK_KEY_space, (Gdk::ModifierType)0, (Gtk::AccelFlags)0);
 
 	show_all();
+	m_boardEventBox.grab_focus();
 
 	m_virtual_board->send_message_to_vpi(VBMessage::gui_started());
 
