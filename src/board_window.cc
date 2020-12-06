@@ -55,6 +55,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_closing(false),
 	m_ledsval(0),
 	m_switchesval(0),
+	m_accel_group(),
 	m_boxMain(Gtk::Orientation::ORIENTATION_VERTICAL),
 	m_toolBar1(),
 	m_boardEventBox(),
@@ -305,6 +306,11 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_boardEventBox.signal_key_press_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_keyboard_event));
 	m_boardEventBox.signal_key_release_event().connect(sigc::mem_fun(*this, &VBWindow::on_my_keyboard_event));
 
+	m_accel_group = Gtk::AccelGroup::create();
+	add_accel_group(m_accel_group);
+	m_stepButton.add_accelerator("clicked", m_accel_group, GDK_KEY_s, (Gdk::ModifierType)0, (Gtk::AccelFlags)0);
+	m_playpauseButton.add_accelerator("clicked", m_accel_group, GDK_KEY_space, (Gdk::ModifierType)0, (Gtk::AccelFlags)0);
+
 	show_all();
 
 	m_virtual_board->send_message_to_vpi(VBMessage::gui_started());
@@ -325,26 +331,10 @@ bool VBWindow::on_main_board_button_press_event(const GdkEventButton* button_eve
 bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 {
 	static bool switch_pressed[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
-	static bool space_pressed = false, s_pressed = false;
 	bool try_switches = false;
 
 	if (event->type == GDK_KEY_PRESS) {
 		switch (event->keyval) {
-			case GDK_KEY_space:
-				if (!space_pressed) {
-					m_playpauseButton.activate();
-					printf("space\n");
-					space_pressed = true;
-				}
-				break;
-			case GDK_KEY_S:
-			case GDK_KEY_s:
-				if (!s_pressed) {
-					printf("s\n");
-					m_stepButton.activate();
-					s_pressed = true;
-				}
-				break;
 			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(true);
 				break;
@@ -469,13 +459,6 @@ bool VBWindow::on_my_keyboard_event(GdkEventKey* event)
 	}
 	else if (event->type == GDK_KEY_RELEASE) {
 		switch (event->keyval) {
-			case GDK_KEY_space:
-				space_pressed = false;
-				break;
-			case GDK_KEY_S:
-			case GDK_KEY_s:
-				s_pressed = false;
-				break;
 			case GDK_KEY_KP_0:
 				m_rstnbnt.set_state(false);
 				break;

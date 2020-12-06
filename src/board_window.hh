@@ -27,6 +27,7 @@
 #include <gtkmm/toolitem.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/separatortoolitem.h>
+#include <gtkmm/accelgroup.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/image.h>
 #include <glibmm/dispatcher.h>
@@ -52,6 +53,7 @@ protected:
 	bool                       m_closing;
 	unsigned int               m_ledsval;
 	unsigned int               m_switchesval;
+	Glib::RefPtr<Gtk::AccelGroup> m_accel_group;
 	Gtk::Box                   m_boxMain;
 	Gtk::Toolbar               m_toolBar1;
 	Gtk::EventBox              m_boardEventBox;
