@@ -120,32 +120,36 @@ static int get_integer_value_from_net(vpiHandle net)
 }
 
 
-static inline void update_net_value_string(ModuleNet *mn)
+static void update_module_net_value_strings(ModuleInstance *mi)
 {
 	s_vpi_value val;
 	val.format = vpiBinStrVal;
-	vpi_get_value(mn->handle, &val);
-	if (!val.value.str) {
-		if (mn->value.empty()) {
-			mn->value = std::string("please use GHDL > v0.37");
-			mn->value_changed = true;
+	for (std::vector<ModuleNet>::iterator it = mi->nets.begin(); it != mi->nets.end(); ++it) {
+		vpi_get_value(it->handle, &val);
+		if (!val.value.str) {
+			if (it->value.empty()) {
+				it->value = std::string("please use GHDL > v0.37");
+				it->value_changed = true;
+			}
 		}
-	}
-	else {
-		if (strcmp(val.value.str, mn->value.c_str()) == 0)
-			mn->value_changed = false;
 		else {
-			mn->value = std::string(val.value.str);
-			mn->value_changed = true;
+			if (strcmp(val.value.str, it->value.c_str()) == 0)
+				it->value_changed = false;
+			else {
+				it->value = std::string(val.value.str);
+				it->value_changed = true;
+			}
 		}
 	}
 }
 
 
-static void update_module_net_value_strings(ModuleInstance *mi)
+static void put_value_to_net(ModuleNet *mn)
 {
-	for (std::vector<ModuleNet>::iterator it = mi->nets.begin(); it != mi->nets.end(); ++it)
-		update_net_value_string(&(*it));
+	s_vpi_value val;
+	val.format = vpiBinStrVal;
+	val.value.str = mn->value_to_force.c_str();
+	vpi_put_value(mn->handle, &val, NULL, vpiNoDelay);
 }
 
 
@@ -475,10 +479,6 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 						wait_other_messages = true;
 				}
 				break;
-			case VBMessage::MSG_READ_NET:
-				update_net_value_string(msg.module_net());
-				vboard->send_message_to_gui(VBMessage::net_read(msg.module_net()));
-				break;
 			case VBMessage::MSG_READ_MODULE_NETS:
 				update_module_net_value_strings(msg.module_instance());
 				vboard->send_message_to_gui(VBMessage::module_nets_read(msg.module_instance()));
@@ -514,6 +514,9 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 				break;
 			case VBMessage::MSG_SET_FREQ:
 				vboard->set_timer_frequency(msg.value());
+				break;
+			case VBMessage::MSG_WRITE_NET:
+				put_value_to_net(msg.module_net());
 				break;
 			default:
 				printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());

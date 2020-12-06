@@ -195,7 +195,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	m_net_treeview.append_column("Nets",  m_net_model_column.m_col_name);
 	m_net_treeview.append_column("W",     m_net_model_column.m_col_width);
 	m_net_treeview.append_column("IO",    m_net_model_column.m_col_type);
-	/*******************************************************/
+
 	m_net_value_treeviewcolumn.set_title("Value");
 	m_net_value_treeviewcolumn.pack_start(m_net_value_renderer);
 	m_net_treeview.append_column(m_net_value_treeviewcolumn);
@@ -204,17 +204,10 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 			sigc::mem_fun(*this, &InspectorWindow::treeviewcolumn_net_value_on_cell_data));
 	m_net_value_renderer.property_family() = "Monospace";
 	//m_net_value_renderer.property_style() = Pango::STYLE_ITALIC;
+	// Make the CellRenderer editable, and handle its editing signals:
+	m_net_value_renderer.property_editable() = true;
+	m_net_value_renderer.signal_edited().connect(sigc::mem_fun(*this, &InspectorWindow::on_net_value_edited));
 
-//	//Make the CellRenderer editable, and handle its editing signals:
-//	m_net_value_renderer.property_editable() = true;
-//
-//	m_net_value_renderer.signal_editing_started().connect(
-//			sigc::mem_fun(*this,
-//				&InspectorWindow::cellrenderer_net_value_on_editing_started) );
-//
-//	m_net_value_renderer.signal_edited().connect(sigc::mem_fun(*this,
-//				&InspectorWindow::cellrenderer_net_value_on_edited));
-	/*******************************************************/
 	m_net_treeview.get_column(0)->set_min_width(25);
 	m_net_treeview.get_column(1)->set_alignment(Gtk::ALIGN_CENTER);
 	m_net_treeview.get_column(2)->set_alignment(Gtk::ALIGN_CENTER);
@@ -233,13 +226,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	//m_net_treeview.set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_BOTH); //TREE_VIEW_GRID_LINES_HORIZONTAL
 	m_net_treeview.set_grid_lines(Gtk::TREE_VIEW_GRID_LINES_VERTICAL); //TREE_VIEW_GRID_LINES_HORIZONTAL
 
-	//m_net_treeview.append_column_numeric("Formatted number", m_net_model_column.m_col_number,
-	//		"%010d" /* 10 digits, using leading zeroes. */);
 
-	//Make all the columns reorderable:
-	//This is not necessary, but it's nice to show the feature.
-	//You can use TreeView::set_column_drag_function() to more
-	//finely control column drag and drop.
 	for (guint i = 0; i < 4; i++) {
 		m_net_treeview.get_column(i)->set_reorderable();
 		m_net_treeview.get_column(i)->set_resizable();
@@ -439,76 +426,6 @@ std::string InspectorWindow::binary_to_hexa(const std::string& binary)
 }
 
 
-// void InspectorWindow::cellrenderer_net_value_on_editing_started(
-//         Gtk::CellEditable* cell_editable, const Glib::ustring& path)
-// {
-//   //Start editing with previously-entered (but invalid) text,
-//   //if we are allowing the user to correct some invalid data.
-//   if(m_validate_retry)
-//   {
-//     //This is the CellEditable inside the CellRenderer.
-//     auto celleditable_validated = cell_editable;
-// 
-//     //It's usually an Entry, at least for a CellRendererText:
-//     auto pEntry = dynamic_cast<Gtk::Entry*>(celleditable_validated);
-//     if(pEntry)
-//     {
-//       pEntry->set_text(m_invalid_text_for_retry);
-//       m_validate_retry = false;
-//       m_invalid_text_for_retry.clear();
-//     }
-//   }
-// 
-// }
-// 
-// 
-// void InspectorWindow::cellrenderer_net_value_on_edited(
-//         const Glib::ustring& path_string,
-//         const Glib::ustring& new_text)
-// {
-//   Gtk::TreePath path(path_string);
-// 
-//   //Convert the inputed text to an integer, as needed by our model column:
-//   char* pchEnd = nullptr;
-//   int new_value = strtol(new_text.c_str(), &pchEnd, 10);
-// 
-//   if(new_value > 10)
-//   {
-//     //Prevent entry of numbers higher than 10.
-// 
-//     //Tell the user:
-//     Gtk::MessageDialog dialog(*this,
-//             "The number must be less than 10. Please try again.",
-//             false, Gtk::MESSAGE_ERROR);
-//     dialog.run();
-// 
-//     //Start editing again, with the bad text, so that the user can correct it.
-//     //A real application should probably allow the user to revert to the
-//     //previous text.
-// 
-//     //Set the text to be used in the start_editing signal handler:
-//     m_invalid_text_for_retry = new_text;
-//     m_validate_retry = true;
-// 
-//     //Start editing again:
-//     m_TreeView.set_cursor(path, m_treeviewcolumn_validated,
-//             m_cellrenderer_validated, true /* start_editing */);
-//   }
-//   else
-//   {
-//     //Get the row from the path:
-//     Gtk::TreeModel::iterator iter = m_refTreeModel->get_iter(path);
-//     if(iter)
-//     {
-//       Gtk::TreeModel::Row row = *iter;
-// 
-//       //Put the new value in the model:
-//       row[m_Columns.m_col_number_validated] = new_value;
-//     }
-//   }
-// }
-
-
 void InspectorWindow::on_my_show()
 {
 	//std::cout << "Show inspector" << std::endl;
@@ -527,6 +444,52 @@ bool InspectorWindow::on_my_timeout()
 	//std::cout << "on_my_timeout()" << std::endl;
 	m_virtual_board->send_message_to_vpi(VBMessage::read_module_nets(m_curren_module));
 	return true;
+}
+
+
+void InspectorWindow::on_net_value_edited(const Glib::ustring& path, const Glib::ustring& new_text)
+{
+	Glib::RefPtr<Gtk::TreeModel> model = m_net_treeview.get_model();
+	Gtk::TreeModel::iterator iter = model->get_iter(path);
+	if (iter) {
+		switch ((*iter)[m_net_model_column.m_col_format]) {
+			case 0: // binary
+				put_binary_value(new_text, (ModuleNet*)((*iter)[m_net_model_column.m_col_net]));
+				break;
+			case 1: // decimal
+				put_decimal_value(new_text, (ModuleNet*)((*iter)[m_net_model_column.m_col_net]));
+				std::cout << "Decimal" << std::endl;
+				break;
+			case 2: // hexa
+				put_hexa_value(new_text, (ModuleNet*)((*iter)[m_net_model_column.m_col_net]));
+				std::cout << "Hexa" << std::endl;
+				break;
+		}
+	}
+	std::cout << path << " -> " << new_text << std::endl;
+}
+
+
+void InspectorWindow::put_binary_value(const Glib::ustring& user_string, ModuleNet *net)
+{
+	const int w = (user_string.size() < net->width) ? user_string.size() : net->width;
+	int i, j;
+	net->value_to_force = std::string(net->width, '0');
+	for (i = net->width - 1, j - user_string.size() - 1; i >= 0 && j >= 0; i--, j--) {
+		switch (user_string[j]) {
+
+		}
+	}
+}
+
+
+void InspectorWindow::put_decimal_value(const Glib::ustring& user_string, ModuleNet *net)
+{
+}
+
+
+void InspectorWindow::put_hexa_value(const Glib::ustring& user_string, ModuleNet *net)
+{
 }
 
 

@@ -124,6 +124,7 @@ private:
 	bool on_my_delete_event(GdkEventAny* any_event);
 	void on_module_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 //	void on_net_treeview_row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+	void on_net_value_edited(const Glib::ustring& path, const Glib::ustring& new_text);
 	void build_module_hierarchy_model(Gtk::TreeModel::Row& row, ModuleInstance& inst);
 
 	void treeviewcolumn_net_value_on_cell_data(Gtk::CellRenderer *renderer, const Gtk::TreeModel::iterator& iter);
@@ -133,6 +134,10 @@ private:
 
 	std::string binary_to_decimal(const std::string& binary);
 	std::string binary_to_hexa(const std::string& binary);
+
+	void put_binary_value(const Glib::ustring& user_string, ModuleNet *net);
+	void put_decimal_value(const Glib::ustring& user_string, ModuleNet *net);
+	void put_hexa_value(const Glib::ustring& user_string, ModuleNet *net);
 };
 
 

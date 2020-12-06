@@ -58,8 +58,7 @@ public:
 		MSG_GUI_STARTED,
 		MSG_READ_MODULE_NETS, // pointer points to a ModuleInstance
 		MSG_MODULE_NETS_READ, // pointer points to a ModuleInstance
-		MSG_READ_NET, // pointer points to a ModuleNet
-		MSG_NET_READ // pointer points to a ModuleNet
+		MSG_WRITE_NET, // pointer points to a ModuleNet
 	} message_type_t;
 
 private:
@@ -95,8 +94,7 @@ public:
 	static VBMessage gui_started();
 	static VBMessage read_module_nets(ModuleInstance *mod);
 	static VBMessage module_nets_read(ModuleInstance *mod);
-	static VBMessage read_net(ModuleNet *net);
-	static VBMessage net_read(ModuleNet *net);
+	static VBMessage write_net(ModuleNet *net);
 };
 
 #endif /* VB_MESSAGE_HH */

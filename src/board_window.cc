@@ -720,9 +720,6 @@ void VBWindow::on_notification_from_vpi()
 				//printf("Nets of module %s updated\n", msg.module_instance()->name.c_str());
 				m_inspector_window.update_module_signals_model(*msg.module_instance());
 				break;
-			case VBMessage::MSG_NET_READ:
-				printf("Net %s: %s\n", msg.module_net()->name.c_str(), msg.module_net()->value.c_str());
-				break;
 			case VBMessage::MSG_STOPPED:
 				//printf("MSG_STOPPED\n");
 				m_state_running = false;
