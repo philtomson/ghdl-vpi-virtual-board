@@ -472,24 +472,62 @@ void InspectorWindow::on_net_value_edited(const Glib::ustring& path, const Glib:
 
 void InspectorWindow::put_binary_value(const Glib::ustring& user_string, ModuleNet *net)
 {
-	const int w = (user_string.size() < net->width) ? user_string.size() : net->width;
 	int i, j;
+	char c;
+	bool valid = true;
 	net->value_to_force = std::string(net->width, '0');
-	for (i = net->width - 1, j - user_string.size() - 1; i >= 0 && j >= 0; i--, j--) {
-		switch (user_string[j]) {
-
+	for (i = net->width - 1, j = user_string.size() - 1; i >= 0 && j >= 0; i--, j--) {
+		c = user_string[j];
+		switch (c) {
+			case 'U':
+			case 'X':
+			case '0':
+			case '1':
+			case 'Z':
+			case 'W':
+			case 'L':
+			case 'H':
+			case '-':
+				net->value_to_force[i] = c;
+				break;
+			case 'u':
+				net->value_to_force[i] = 'U';
+				break;
+			case 'x':
+				net->value_to_force[i] = 'X';
+				break;
+			case 'z':
+				net->value_to_force[i] = 'Z';
+				break;
+			case 'w':
+				net->value_to_force[i] = 'W';
+				break;
+			case 'l':
+				net->value_to_force[i] = 'L';
+				break;
+			case 'h':
+				net->value_to_force[i] = 'H';
+				break;
+			default:
+				valid = false;
 		}
 	}
+	if (valid)
+		m_virtual_board->send_message_to_vpi(VBMessage::write_net(net));
 }
 
 
 void InspectorWindow::put_decimal_value(const Glib::ustring& user_string, ModuleNet *net)
 {
+	(void)user_string;
+	(void)net;
 }
 
 
 void InspectorWindow::put_hexa_value(const Glib::ustring& user_string, ModuleNet *net)
 {
+	(void)user_string;
+	(void)net;
 }
 
 

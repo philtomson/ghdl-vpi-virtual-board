@@ -148,7 +148,8 @@ static void put_value_to_net(ModuleNet *mn)
 {
 	s_vpi_value val;
 	val.format = vpiBinStrVal;
-	val.value.str = mn->value_to_force.c_str();
+	val.value.str = (char*)mn->value_to_force.c_str();
+	printf("VPI put value to net %s = %s\n", mn->name.c_str(), val.value.str);
 	vpi_put_value(mn->handle, &val, NULL, vpiNoDelay);
 }
 
@@ -517,6 +518,13 @@ static PLI_INT32 main_callback(p_cb_data cb_data)
 				break;
 			case VBMessage::MSG_WRITE_NET:
 				put_value_to_net(msg.module_net());
+				/* FIXME: in GHDL it seems we cannot set the value of an Integer.
+				 * nothing happen, so this is the end of the delta cycle so the simulation end.
+				 * to prevent this, we write clk.
+				 */
+				if (msg.module_net()->width == 32)
+					put_integer_value_to_net(vboard->clk_net, 0);
+				wait_other_messages = false;
 				break;
 			default:
 				printf("\e[31mVPI: Bad MSG: \"%s\" (%d)\e[0m\n", msg.type_to_s(), msg.type());

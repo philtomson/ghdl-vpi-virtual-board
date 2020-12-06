@@ -30,6 +30,7 @@ public:
 	int                  direction; // 0: none, 1: input, 2: output, 3: inout
 	vpiHandle            handle;
 	std::string          value;
+	std::string          value_to_force;
 	bool                 value_changed;
 
 	ModuleNet();
