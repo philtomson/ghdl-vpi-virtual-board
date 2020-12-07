@@ -68,8 +68,11 @@ public:
 	vpiHandle    display5_net;
 	vpiHandle    display6_net;
 	vpiHandle    display7_net;
+	vpiHandle    anodes_net;
+	vpiHandle    cathodes_net;
 	vpiHandle    rgb0_net;
 	vpiHandle    rgb1_net;
+	int          display_interface; // 0: none, 1: direct, 2: anodes multiplexing
 
 public:
 	VirtualBoard();

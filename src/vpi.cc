@@ -154,7 +154,7 @@ static void update_module_net_value_strings(ModuleInstance *mi)
 // }
 
 
-static void gather_toplevel_IO_nets(VirtualBoard& vboard)
+static int gather_toplevel_IO_nets(VirtualBoard& vboard)
 {
 	vpiHandle iter, top, net;
 	const char *net_name;
@@ -218,37 +218,65 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 					vboard.leds_net = net;
 					vpi_printf("\e[32mFound output net leds[16]\e[0m\n");
 				}
+				else if (strcmp("anodes", net_name) == 0 && net_width == 8) {
+					vboard.anodes_net = net;
+					vpi_printf("\e[32mFound output net anodes[8]\e[0m\n");
+					if (vboard.display_interface == 1) return 1;
+					vboard.display_interface = 2;
+				}
+				else if (strcmp("cathodes", net_name) == 0 && net_width == 8) {
+					vboard.cathodes_net = net;
+					vpi_printf("\e[32mFound output net cathodes[8]\e[0m\n");
+					if (vboard.display_interface == 1) return 1;
+					vboard.display_interface = 2;
+				}
 				else if (strcmp("display0", net_name) == 0 && net_width == 8) {
 					vboard.display0_net = net;
 					vpi_printf("\e[32mFound output net display0[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display1", net_name) == 0 && net_width == 8) {
 					vboard.display1_net = net;
 					vpi_printf("\e[32mFound output net display1[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display2", net_name) == 0 && net_width == 8) {
 					vboard.display2_net = net;
 					vpi_printf("\e[32mFound output net display2[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display3", net_name) == 0 && net_width == 8) {
 					vboard.display3_net = net;
 					vpi_printf("\e[32mFound output net display3[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display4", net_name) == 0 && net_width == 8) {
 					vboard.display4_net = net;
 					vpi_printf("\e[32mFound output net display4[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display5", net_name) == 0 && net_width == 8) {
 					vboard.display5_net = net;
 					vpi_printf("\e[32mFound output net display5[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display6", net_name) == 0 && net_width == 8) {
 					vboard.display6_net = net;
 					vpi_printf("\e[32mFound output net display6[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("display7", net_name) == 0 && net_width == 8) {
 					vboard.display7_net = net;
 					vpi_printf("\e[32mFound output net display7[8]\e[0m\n");
+					if (vboard.display_interface == 2) return 1;
+					vboard.display_interface = 1;
 				}
 				else if (strcmp("rgb0", net_name) == 0 && net_width == 3) {
 					vboard.rgb0_net = net;
@@ -271,6 +299,8 @@ static void gather_toplevel_IO_nets(VirtualBoard& vboard)
 		vpi_free_object(iter);
 
 	vpi_free_object(top);
+
+	return 0;
 }
 
 
@@ -403,6 +433,24 @@ static PLI_INT32 on_display7_value_change(p_cb_data cb_data)
 	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
 	int v = get_integer_value_from_net(vboard->display7_net);
 	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::DISPLAY_7, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_anodes_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->anodes_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::ANODES, v));
+	return 0;
+}
+
+
+static PLI_INT32 on_cathodes_value_change(p_cb_data cb_data)
+{
+	VirtualBoard *vboard = (VirtualBoard*)cb_data->user_data;
+	int v = get_integer_value_from_net(vboard->cathodes_net);
+	vboard->send_message_to_gui(VBMessage::io_changed(VBMessage::CATHODES, v));
 	return 0;
 }
 
@@ -591,6 +639,10 @@ static PLI_INT32 reset_startup_callback(p_cb_data cb_data)
 				register_value_change_cb(on_display6_value_change, vboard->display6_net, vboard);
 			if (vboard->display7_net)
 				register_value_change_cb(on_display7_value_change, vboard->display7_net, vboard);
+			if (vboard->anodes_net)
+				register_value_change_cb(on_anodes_value_change, vboard->anodes_net, vboard);
+			if (vboard->cathodes_net)
+				register_value_change_cb(on_cathodes_value_change, vboard->cathodes_net, vboard);
 			if (vboard->rgb0_net)
 				register_value_change_cb(on_rgb0_value_change, vboard->rgb0_net, vboard);
 			if (vboard->rgb1_net)
@@ -646,7 +698,12 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	vboard->simulator_name = std::string(info.product);
 	vboard->simulator_version = std::string(info.version);
 
-	gather_toplevel_IO_nets(*vboard);
+	if (gather_toplevel_IO_nets(*vboard)) {
+		vpi_printf("\e[31mError: To use the 7 segment displays, either use the direct interface\n"
+				"       with display0[8] to display7[8], or use anode multiplexing with\n"
+				"       anodes[8] and cathodes[8], but do not mix both.\e[0m\n");
+		return 0;
+	}
 
 	if (!vboard->clk_net) {
 		vpi_printf("\e[31mError: Did no find an input net named \"clk\" of one bit.\e[0m\n");
@@ -668,21 +725,25 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 		vpi_printf("\e[33mInput net button_l[1] NOT FOUND\e[0m\n");
 	if (!vboard->leds_net)
 		vpi_printf("\e[33mOutput net leds[16] NOT FOUND\e[0m\n");
-	if (!vboard->display0_net)
+	if (!vboard->anodes_net && vboard->display_interface != 1)
+		vpi_printf("\e[33mOutput net anodes[8] NOT FOUND\e[0m\n");
+	if (!vboard->cathodes_net && vboard->display_interface != 1)
+		vpi_printf("\e[33mOutput net cathodes[8] NOT FOUND\e[0m\n");
+	if (!vboard->display0_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display0[8] NOT FOUND\e[0m\n");
-	if (!vboard->display1_net)
+	if (!vboard->display1_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display1[8] NOT FOUND\e[0m\n");
-	if (!vboard->display2_net)
+	if (!vboard->display2_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display2[8] NOT FOUND\e[0m\n");
-	if (!vboard->display3_net)
+	if (!vboard->display3_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display3[8] NOT FOUND\e[0m\n");
-	if (!vboard->display4_net)
+	if (!vboard->display4_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display4[8] NOT FOUND\e[0m\n");
-	if (!vboard->display5_net)
+	if (!vboard->display5_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display5[8] NOT FOUND\e[0m\n");
-	if (!vboard->display6_net)
+	if (!vboard->display6_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display6[8] NOT FOUND\e[0m\n");
-	if (!vboard->display7_net)
+	if (!vboard->display7_net && vboard->display_interface != 2)
 		vpi_printf("\e[33mOutput net display7[8] NOT FOUND\e[0m\n");
 	if (!vboard->rgb0_net)
 		vpi_printf("\e[33mOutput net rgb0[3] NOT FOUND\e[0m\n");

@@ -53,8 +53,11 @@ VirtualBoard::VirtualBoard() :
 	display5_net(nullptr),
 	display6_net(nullptr),
 	display7_net(nullptr),
+	anodes_net(nullptr),
+	cathodes_net(nullptr),
 	rgb0_net(nullptr),
-	rgb1_net(nullptr)
+	rgb1_net(nullptr),
+	display_interface(0)
 {
 	create_timer();
 }

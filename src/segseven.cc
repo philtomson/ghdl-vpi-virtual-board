@@ -91,49 +91,49 @@ bool SegSeven::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 	cr->paint();
 
-	if ((m_state & 0x01) && m_pixbuf_a) {
+	if ((m_state & 0x80) && m_pixbuf_a) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_a, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x02) && m_pixbuf_b) {
+	if ((m_state & 0x40) && m_pixbuf_b) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_b, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x04) && m_pixbuf_c) {
+	if ((m_state & 0x20) && m_pixbuf_c) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_c, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x08) && m_pixbuf_d) {
+	if ((m_state & 0x10) && m_pixbuf_d) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_d, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x10) && m_pixbuf_e) {
+	if ((m_state & 0x08) && m_pixbuf_e) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_e, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x20) && m_pixbuf_f) {
+	if ((m_state & 0x04) && m_pixbuf_f) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_f, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x40) && m_pixbuf_g) {
+	if ((m_state & 0x02) && m_pixbuf_g) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_g, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
 		cr->paint();
 	}
-	if ((m_state & 0x80) && m_pixbuf_p) {
+	if ((m_state & 0x01) && m_pixbuf_p) {
 		Gdk::Cairo::set_source_pixbuf(cr, m_pixbuf_p, 
 				(wid - SEGSEV_PIXBUF_WIDTH)/2,
 				(hei - SEGSEV_PIXBUF_HEIGHT)/2);
@@ -146,7 +146,8 @@ bool SegSeven::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
 void SegSeven::set_digit(unsigned char digit, bool with_dot)
 {
-	static const unsigned char segdigits[16] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x58, 0x5e, 0x79, 0x71};
+	//static const unsigned char segdigits[16] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x58, 0x5e, 0x79, 0x71};
+	static const unsigned char segdigits[16] = {0xfc, 0x60, 0xda, 0xf2, 0x66, 0xb6, 0xbe, 0xe0, 0xfe, 0xf6, 0xee, 0x3e, 0x1a, 0x7a, 0x9e, 0x8e};
 	unsigned char state = segdigits[digit & 0x0f];
 	if (with_dot)
 		state |= 0x80;

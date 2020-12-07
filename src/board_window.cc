@@ -94,7 +94,8 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_rgb_1(),
 	m_rstnbnt(PushButton::PUSH_BUTTON_PADS_HORIZONTAL, false),
 	m_rgb_2(),
-	m_inspector_window(virtual_board)
+	m_inspector_window(virtual_board),
+	m_display_timeout_connection()
 {
 	int i;
 
@@ -310,6 +311,13 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	add_accel_group(m_accel_group);
 	m_stepButton.add_accelerator("clicked", m_accel_group, GDK_KEY_s, (Gdk::ModifierType)0, (Gtk::AccelFlags)0);
 	m_playpauseButton.add_accelerator("clicked", m_accel_group, GDK_KEY_space, (Gdk::ModifierType)0, (Gtk::AccelFlags)0);
+
+	if (m_virtual_board->display_interface == 2)
+		m_display_timeout_connection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &VBWindow::on_my_display_timeout), 33);
+	m_display_cathodes = 0;
+	m_display_anodes = 0;
+	for (i = 0; i < 8; i++)
+		m_display_timeouts[i] = 0;
 
 	show_all();
 	m_boardEventBox.grab_focus();
@@ -675,6 +683,22 @@ void VBWindow::on_notification_from_vpi()
 				//printf("\e[32mMSG_IO_CHANGED\e[0m\n");
 				val = msg.value();
 				switch (msg.io_name()) {
+					case VBMessage::ANODES:
+						m_display_anodes = (unsigned char)(~val);
+						for (i = 0; i < 8; i++) {
+							if (m_display_anodes & (1 << i)) {
+								m_displays[i]->set_state(m_display_cathodes);
+								m_display_timeouts[i] = 4;
+							}
+						}
+						break;
+					case VBMessage::CATHODES:
+						m_display_cathodes = (unsigned char)(~val);
+						for (i = 0; i < 8; i++) {
+							if (m_display_anodes & (1 << i))
+								m_displays[i]->set_state(m_display_cathodes);
+						}
+						break;
 					case VBMessage::LEDS:
 						for (i = 0, b = 1; i < 16; i++, b <<= 1) {
 							if ((val & b) ^ (m_ledsval & b))
@@ -748,6 +772,21 @@ void VBWindow::on_notification_from_vpi()
 		if (try_to_read_other_messages)
 			msg = m_virtual_board->receive_message_to_gui();
 	}
+}
+
+
+bool VBWindow::on_my_display_timeout()
+{
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		if ((m_display_anodes & (1 << i)) == 0 && m_display_timeouts[i] > 0) {
+			m_display_timeouts[i]--;
+			if (m_display_timeouts[i] == 0)
+				m_displays[i]->set_state(0);
+		}
+	}
+	return true;
 }
 
 

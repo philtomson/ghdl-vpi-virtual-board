@@ -93,6 +93,10 @@ protected:
 	PushButton                 m_rstnbnt;
 	RGBLed                     m_rgb_2;
 	InspectorWindow            m_inspector_window;
+	sigc::connection           m_display_timeout_connection;
+	int                        m_display_timeouts[8];
+	unsigned char              m_display_anodes;
+	unsigned char              m_display_cathodes;
 	Gtk::Label                *m_labels[16];
 	Switch                    *m_switches[16];
 	Led                       *m_leds[16];
@@ -125,6 +129,7 @@ protected:
 	bool on_my_delete_event(GdkEventAny* any_event);
 	bool on_main_board_button_press_event(const GdkEventButton* button_event);
 	bool on_my_keyboard_event(GdkEventKey* event);
+	bool on_my_display_timeout();
 
 	void on_notification_from_vpi();
 };

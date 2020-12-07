@@ -41,7 +41,9 @@ public:
 		DISPLAY_4,
 		DISPLAY_5,
 		DISPLAY_6,
-		DISPLAY_7
+		DISPLAY_7,
+		ANODES,
+		CATHODES
 	} IO_name_t;
 
 	typedef enum {
