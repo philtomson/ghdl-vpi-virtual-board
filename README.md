@@ -64,6 +64,37 @@ Of course if you are using one of the GCC or LLVM back-ends of GHDL,
 you can directly invoke the executable file with the `--vpi=` switch instead of the `ghdl -r ...` command.
 
 
+The 7 segment displays
+----------------------
+
+Two different interfaces can be used for the eight 7 segment displays.
+* common cathode interface for each display
+* common anode displays  
+You can use none or one of this interface, but you cannot mix both.
+
+
+### Common cathode interface
+
+![common cathode](images/common_cathode.png)
+
+This is the simplest interface: one output bit per segment and per display.
+Declare output signals `display0(7 downto 0)` to `display7(7 downto 0)`.
+A logic value `1` switch the segment on, a `0` switch it off;
+
+
+### Common anode
+
+To be more realistic and to be compatible with the [Nexys-4](https://reference.digilentinc.com/reference/programmable-logic/nexys-4/reference-manual) FPGA board,
+a common annode with multiplexing is proposed.
+
+![common anode](images/common_anode.png)
+
+Delare two output signals: `anodes(7 downto 0)` and `cathodes(7 downto 0)`.
+Cathodes are shared between all the displays, and all anodes from a given display are driven by a PNP transistor.
+Thereby to light up a segment from a display, its cathode signal must be low and the anode bit corresponding to
+the display must also be low.
+
+
 The simulation progress
 -----------------------
 
@@ -125,7 +156,7 @@ By right-clicking on signals, you can choose to display them either in binary, d
 How to compile the virtual board plugin
 ---------------------------------------
 
-First, you will need a working GHDL (v0.36 or higher) in you path.
+First, you will need a working GHDL (v0.36 or higher) in your path.
 Either one of GHDL's back-ends will work (mcode, GCC or LLVM).
 
 To [build and install](https://ghdl.readthedocs.io/en/latest/getting/mcode.html) the latest GHDL version:
@@ -141,7 +172,9 @@ sudo make install
 
 To build the VPI application:
 ```bash
-sudo apt install libgtkmm-3.0-dev
+sudo apt install libgtkmm-3.0-dev build-essential
+git clone https://gitlab.ensta-bretagne.fr/bollenth/ghdl-vpi-virtual-board.git
+cd ghdl-vpi-virtual-board
 make
 ```
 It will produce the shared object `./build/virtual_board.vpi`.
