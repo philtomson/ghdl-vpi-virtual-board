@@ -22,7 +22,6 @@
 VirtualBoard::VirtualBoard() :
 	m_thread(nullptr),
 	m_window(nullptr),
-	m_time_resolution(1.0),
 	m_to_vpi_mutex(),
 	m_to_vpi_condvar(),
 	m_to_vpi_queue(),
@@ -57,6 +56,7 @@ VirtualBoard::VirtualBoard() :
 	cathodes_net(nullptr),
 	rgb0_net(nullptr),
 	rgb1_net(nullptr),
+	time_resolution(1.0),
 	display_interface(0)
 {
 	create_timer();
@@ -107,25 +107,6 @@ void VirtualBoard::stop_gui_thread()
 	}
 	delete m_thread;
 	m_thread = nullptr;
-}
-
-
-void VirtualBoard::set_time_resolution(int res)
-{
-	m_time_resolution = std::pow(10, -res);
-}
-
-
-s_vpi_time VirtualBoard::get_time(double t)
-{
-	s_vpi_time ts;
-	uint64_t simtime = (uint64_t)(t * m_time_resolution);
-
-	ts.type = vpiSimTime;
-	ts.low = (uint32_t)(simtime & 0xffffffffUL);
-	ts.high = (uint32_t)(simtime >> 32);
-
-	return ts;
 }
 
 

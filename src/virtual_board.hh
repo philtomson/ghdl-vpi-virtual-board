@@ -35,7 +35,6 @@ class VirtualBoard {
 private:
 	std::thread *m_thread;
 	VBWindow    *m_window;
-	double       m_time_resolution;
 	std::mutex   m_to_vpi_mutex;
 	std::condition_variable m_to_vpi_condvar;
 	std::queue<VBMessage> m_to_vpi_queue;
@@ -72,6 +71,7 @@ public:
 	vpiHandle    cathodes_net;
 	vpiHandle    rgb0_net;
 	vpiHandle    rgb1_net;
+	double       time_resolution;
 	int          display_interface; // 0: none, 1: direct, 2: anodes multiplexing
 
 public:
@@ -80,8 +80,6 @@ public:
 
 	void start_gui_thread();
 
-	void set_time_resolution(int res);
-	s_vpi_time get_time(double t);
 	double half_period();
 
 	void set_timer_frequency(int freq);

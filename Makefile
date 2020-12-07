@@ -17,9 +17,9 @@ OBJS     = $(addprefix $(BUILD)/, $(notdir $(SRC:.cc=.o)))
 OBJS    += $(BUILD)/resources.o
 CFLAGS  += -W -Wall -Wno-write-strings -O2 -Isrc `pkg-config --cflags gtkmm-3.0`
 LDFLAGS += `pkg-config --libs gtkmm-3.0` -lm -lrt
-#GHDL     = ghdl
+GHDL     = ghdl
 #GHDL     = /opt/ghdl-0.35-mcode/bin/ghdl
-GHDL     = /opt/ghdl-0.36-mcode/bin/ghdl
+#GHDL     = /opt/ghdl-0.36-mcode/bin/ghdl
 #GHDL     = /opt/ghdl-0.37-mcode/bin/ghdl
 #GHDL     = /opt/ghdl-0.37.0-mcode/bin/ghdl
 #GHDL     = /opt/ghdl-nightly-mcode/bin/ghdl

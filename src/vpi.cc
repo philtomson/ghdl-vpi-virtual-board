@@ -21,11 +21,24 @@
 #include "Instance.hh"
 
 
+static s_vpi_time double_to_vpi_time(double t, double time_resolution)
+{
+	s_vpi_time ts;
+	uint64_t simtime = (uint64_t)(t * time_resolution);
+
+	ts.type = vpiSimTime;
+	ts.low = (uint32_t)(simtime & 0xffffffffUL);
+	ts.high = (uint32_t)(simtime >> 32);
+
+	return ts;
+}
+
+
 static void register_cb_after(PLI_INT32 (*cb_rtn)(struct t_cb_data *), double delay, VirtualBoard *vboard)
 {
 	s_cb_data cb;
 	vpiHandle callback_handle;
-	s_vpi_time time = vboard->get_time(delay);
+	s_vpi_time time = double_to_vpi_time(delay, vboard->time_resolution);
 
 	cb.reason = cbAfterDelay;
 	cb.cb_rtn = cb_rtn;
@@ -750,7 +763,7 @@ static PLI_INT32 start_of_sim_cb(p_cb_data cb_data)
 	if (!vboard->rgb1_net)
 		vpi_printf("\e[33mOutput net rgb1[3] NOT FOUND\e[0m\n");
 
-	vboard->set_time_resolution(vpi_get(vpiTimePrecision, NULL));
+	vboard->time_resolution = std::pow(10, -vpi_get(vpiTimePrecision, NULL));
 
 	gather_all_nets(vboard->top_module, NULL);
 	//vboard->top_module.print();
