@@ -95,10 +95,10 @@ ModuleInstance* VBMessage::module_instance() const
 }
 
 
-ModuleNet* VBMessage::module_net() const
-{
-	return (ModuleNet*)m_pointer;
-}
+// ModuleNet* VBMessage::module_net() const
+// {
+// 	return (ModuleNet*)m_pointer;
+// }
 
 
 VBMessage VBMessage::exit()
@@ -185,11 +185,11 @@ VBMessage VBMessage::module_nets_read(ModuleInstance *mod)
 }
 
 
-VBMessage VBMessage::write_net(ModuleNet *net)
-{
-	VBMessage msg(VBMessage::MSG_WRITE_NET, (void*)net);
-	return msg;
-}
+// VBMessage VBMessage::write_net(ModuleNet *net)
+// {
+// 	VBMessage msg(VBMessage::MSG_WRITE_NET, (void*)net);
+// 	return msg;
+// }
 
 
 const char *VBMessage::type_to_s() const
@@ -221,8 +221,8 @@ const char *VBMessage::type_to_s() const
 			return "MSG_READ_MODULE_NETS";
 		case VBMessage::MSG_MODULE_NETS_READ:
 			return "MSG_MODULE_NETS_READ";
-		case VBMessage::MSG_WRITE_NET:
-			return "MSG_WRITE_NET";
+//		case VBMessage::MSG_WRITE_NET:
+//			return "MSG_WRITE_NET";
 	}
 
 	return "Unknown MSG";
