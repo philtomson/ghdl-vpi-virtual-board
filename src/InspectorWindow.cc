@@ -135,7 +135,7 @@ InspectorWindow::InspectorWindow(VirtualBoard* vb) :
 	signal_show().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_show));
 	signal_hide().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_hide));
 	signal_delete_event().connect(sigc::mem_fun(*this, &InspectorWindow::on_my_delete_event));
-	set_size_request(640, 480);
+	set_size_request(640, 400);
 	//set_border_width(5);
 //	m_paned.set_margin_bottom(5);
 //	m_paned.set_margin_top(0);

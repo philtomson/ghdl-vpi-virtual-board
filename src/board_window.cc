@@ -230,7 +230,7 @@ VBWindow::VBWindow(VirtualBoard *virtual_board) :
 	m_board_name.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	m_box_names.pack_start(m_board_name, Gtk::PACK_EXPAND_WIDGET, 0);
 
-	m_design_name.set_label(std::string("[") + m_virtual_board->design_top_unit_name + std::string("]"));
+	m_design_name.set_label(std::string(" [") + m_virtual_board->design_top_unit_name + std::string("]"));
 	m_design_name.override_color(Gdk::RGBA("white"));
 	//m_design_name.set_justify(Gtk::JUSTIFY_RIGHT);
 	m_design_name.set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
