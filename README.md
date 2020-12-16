@@ -3,7 +3,7 @@ GHDL VPI virtual board
 ======================
 
 VPI virtual board is a VPI application compatible with the GHDL simulator,
-that virtualizes the IOs of a Nexys-4 like board. 
+that virtualizes the IOs of a Digilent Nexys-4 like board.
 
 The aim of this software is to give students a simple platform to play with [VHDL](https://en.wikipedia.org/wiki/VHDL)
 through the open source [GHDL](https://ghdl.readthedocs.io/en/latest/about.html#what-is-ghdl) simulator,
@@ -17,8 +17,8 @@ How to use with your design
 ---------------------------
 
 The virtual board is a [VPI](https://en.wikipedia.org/wiki/Verilog_Procedural_Interface) plugin.
-Thereby, neither special elaboration/compilation steps nor VHDL source code modifications are requiered to work with the virtual board.
-It even works with GHDL's `mcode` back-end wich does no produce any executable file! 
+Thereby, neither special elaboration/compilation steps nor VHDL source code modifications are required to work with the virtual board.
+It even works with GHDL's `mcode` back-end which does not produce any executable file!
 
 The only constraint is the name, width and direction of the top-level entity's IO signals.
 
@@ -60,7 +60,7 @@ ghdl -r <TOP_LEVEL_ENTITY> --vpi=./virtual_board.vpi # run simulation with virtu
 # (which can be opened with gtkwave)
 ghdl -r <TOP_LEVEL_ENTITY> --vpi=./virtual_board.vpi --vcd=dump.vcd
 ```
-Of course if you are using one of the GCC or LLVM back-ends of GHDL, 
+Of course if you are using one of the GCC or LLVM back-ends of GHDL,
 you can directly invoke the executable file with the `--vpi=` switch instead of the `ghdl -r ...` command.
 
 
@@ -106,7 +106,7 @@ Once the virtual board is opened, the clock is frozen and the simulation time is
 Only outputs which have a combinatorial path which leads to an input may react to input changes when
 the clock is frozen (for example if you directly connect the LEDs to the switches).
 
-To advance time, you can press either the run/pause button or the step button. 
+To advance time, you can press either the run/pause button or the step button.
 The real and simulation time between two clock cycles can be set with the frequency spin button (in Hz).
 
 Internaly, the simulator is paused just after the clock faling edge at the last known delta,
@@ -114,7 +114,7 @@ and waits for either input changes or a timer event.
 This is why input changes will appear at the falling edges of the clock in simulation dumps.
 
 When the simulation receives a timer event, it will advance half a clock period in simulation time,
-rise the clock signal, advance another half clock period in simulation time, reset the clock signal 
+rise the clock signal, advance another half clock period in simulation time, reset the clock signal
 then register a new callback to wait for other timer or input events (from the board) at the last known simulation delta.
 
 
@@ -134,8 +134,8 @@ To change the value of a switch, just click on it, or scroll up or down over it 
 
 To use a push button, click on it, or turn the scroll button while the mouse is over it to generate short presses.
 
-You can also use the keyboard. Click in the main board (green area) to make sure it has keyboard focus, 
-then use the numeric keypad '4', '6', '8', '2', and '5' for left, right, up, down and center push buttons, 
+You can also use the keyboard. Click in the main board (green area) to make sure it has keyboard focus,
+then use the numeric keypad '4', '6', '8', '2', and '5' for left, right, up, down and center push buttons,
 '0' for the reset button.
 
 Switches 0 to 7 can be toggled with keys 'c', 'v', 'b'...,
@@ -183,7 +183,3 @@ You can try it with the provided example VHDL:
 ```bash
 make exec
 ```
-
-
-
-
