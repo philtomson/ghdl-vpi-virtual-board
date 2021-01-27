@@ -2,6 +2,8 @@
 GHDL VPI virtual board
 ======================
 
+(NOTE: this is forked from: https://gitlab.ensta-bretagne.fr/bollenth/ghdl-vpi-virtual-board.git )
+
 VPI virtual board is a VPI application compatible with the GHDL simulator,
 that virtualizes the IOs of a Digilent Nexys-4 like board.
 
